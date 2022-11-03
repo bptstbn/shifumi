@@ -1,3 +1,20 @@
+## Outcome
+
+final Research Question:
+
+__Does removing the background during the Image Preprocessing phase benefit the image classification task at hand.__
+
+Questions to clear until next week:
+- what should be the scope of our project
+- which datasets to use
+- 
+
+What to do until next week:
+- do some preprocessing (everbody tries)
+- jonas writes mockup class for preprocessor
+
+## Jonas Ideas
+
 Research Question along one of the following dimensions:
 - __Descriptive:__ Overview of X
 - __Relational:__ Compare X with Y
