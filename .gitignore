@@ -1,2 +1,7 @@
 # exclude pycharm stuff
 .idea
+DataEng/datasets
+DataEng/out
+DataEng/test_images_out
+DataEng/test.py
+DataEng/test_rmbg_cv2.png

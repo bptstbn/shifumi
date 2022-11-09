@@ -52,4 +52,4 @@ def capture_img(img_name = 'test', directory=os.getcwd(), show_in_window=False, 
 
 
 
-capture_img(save_img=True, show_in_window=False)
+capture_img( img_name='no_hands', save_img=True, show_in_window=False)
