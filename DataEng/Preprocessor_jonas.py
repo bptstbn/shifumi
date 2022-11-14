@@ -7,6 +7,8 @@ I will use cv2 to load the image and resize it to the desired size
 """
 
 import os
+from typing import Tuple
+
 import cv2
 import numpy as np
 import mediapipe as mp
@@ -14,18 +16,18 @@ from rembg import remove
 
 
 class Preprocessor():
-    def __init__(self, remove_background: bool = True, dim_x: int = 200, dim_y: int = 200):
+    def __init__(self, remove_background: bool = True, crop_image: bool = True, dim_x: int = 200, dim_y: int = 200):
         """
         constructs the Preprocessor
 
         :param remove_background: if true, image background is removed
+        :param crop_image: wether or not to crop the image based on te mediapipe hand model
         :param dim_x: number of pixels in x dimension
         :param dim_y: number of pixels in y dimension
         """
         self.remove_background = remove_background
-        self.dimensions = (dim_x, dim_y)
-        self.mp_drawing = mp.solutions.drawing_utils
-        self.mp_drawing_styles = mp.solutions.drawing_styles
+        self.crop_image = crop_image
+        self.desired_dimensions = (dim_y, dim_x)
         self.mp_hands = mp.solutions.hands
 
     def __call__(self, image_path: str):
@@ -35,26 +37,51 @@ class Preprocessor():
         :param image_path: path to the image that should be processed
         :return: the preprocessed image
         """
-        # import the image
+        # import the image, and flip since this is needed for mediapipe
         image = cv2.flip(cv2.imread(image_path), 1)
         # crop image using media pipe hand detection
-        image = self.__crop_image(image)
+        if self.crop_image:
+            image = self.__crop_image(image)
         # remove the background
         if self.remove_background:
             image = self.__remove_bg(image)
         # TODO bring the image into the desired format
-        # use cv2.resize
+        image = self.__resize(image, self.desired_dimensions)
         # here you should return the preprocessed image
         return cv2.flip(image, 1)
 
-    def __resize(self, image):
-        # important, keep the aspect ratio
-        # first resize so that width or heigth fits the newly desired ratio, depending on what is bigger
-        # fill either height or width with additional rows until desired size is reached
-        # fill missing outer pixels
-        raise NotImplementedError("not implemented yet")
+    def __resize(self,
+                 image: np.array,
+                 new_shape: Tuple[int, int],
+                 padding_color: Tuple[int] = (0, 0, 0)):
+        """
+        Maintains aspect ratio and resizes with padding.
+
+        see https://gist.github.com/IdeaKing/11cf5e146d23c5bb219ba3508cca89ec
+
+        :param image: Image to be resized.
+        :param new_shape: Expected (width, height) of new image.
+        :param padding_color: Tuple in BGR of padding color
+        :return: Resized image with padding
+        """
+        original_shape = (image.shape[1], image.shape[0])
+        ratio = float(max(new_shape)) / max(original_shape)
+        new_size = tuple([int(x * ratio) for x in original_shape])
+        image = cv2.resize(image, new_size)
+        delta_w = new_shape[0] - new_size[0]
+        delta_h = new_shape[1] - new_size[1]
+        top, bottom = delta_h // 2, delta_h - (delta_h // 2)
+        left, right = delta_w // 2, delta_w - (delta_w // 2)
+        image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=padding_color)
+        return image
 
     def __remove_bg(self, image):
+        """
+        simply removes background using the rembg library
+
+        :param image: image, cv2.imread
+        :return: image, with transparent background
+        """
         return remove(image)
 
     def __crop_image(self, image):
@@ -70,7 +97,7 @@ class Preprocessor():
                 min_detection_confidence=0.5) as hands:
             # detect the hand using mediapipe
             results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            # TODO check if a hand is found
+            # checks if hand is found
             if results.multi_hand_landmarks:
                 image_height, image_width, _ = image.shape
                 bounding_box = self.__find_bounding_box(results, image_width, image_height, offest=10)
@@ -104,19 +131,29 @@ class Preprocessor():
         # convert to numpy arrays and find min and maximum x and y coordinates -> the bounding box
         np_x_hand_cords = np.asarray(x_hand_cords)
         np_y_hand_cords = np.asarray(y_hand_cords)
-        bbox = np.min(np_x_hand_cords), \
-               np.max(np_x_hand_cords), \
-               np.min(np_y_hand_cords), \
-               np.max(np_y_hand_cords)
+        min_x = np.min(np_x_hand_cords)
+        min_y = np.max(np_x_hand_cords)
+        max_x = np.min(np_y_hand_cords)
+        max_y = np.max(np_y_hand_cords)
         # calculate the offset
         # move x and y points according to min and max differences and offset desired
         offest = offest / 100
-        bbox = bbox[0] - (bbox[1] - bbox[0]) * offest, \
-               bbox[1] + (bbox[1] - bbox[0]) * offest, \
-               bbox[2] - (bbox[3] - bbox[2]) * offest, \
-               bbox[3] + (bbox[3] - bbox[2]) * offest
+        min_x = min_x - (min_y - min_x) * offest
+        min_y = min_y + (min_y - min_x) * offest
+        max_x = max_x - (max_y - max_x) * offest
+        max_y = max_y + (max_y - max_x) * offest
+        # set min x and min y to minimum of 0
+        if min_x < 0:  # min x
+            min_x = 0
+        if max_x < 0:  # min y
+            max_x = 0
+        # set max x and max y to maximum of image_width or height
+        if min_y > image_width:  # max x
+            min_y = image_width
+        if max_y > image_height:  # max y
+            max_y = image_height
 
-        return bbox
+        return min_x, min_y, max_x, max_y
 
     def save_image(self, image, directory, name):
         """
@@ -132,16 +169,40 @@ class Preprocessor():
         cv2.imwrite(os.path.join(directory, f'{name}.png'), image)
 
     def preprocess_entire_folder(self, input_directory, output_directory, allowed_file_endings=['.png']):
+        print(f'process all files ind {input_directory}')
         for file in os.listdir(input_directory):
             if file.endswith(tuple(allowed_file_endings)):
                 # save the preprocessed file to the new folder
                 try:
                     self.save_image(self(os.path.join(input_directory, file)), output_directory, file.split('.')[0])
+                    print(f'\tprocessed: {file} and written into {output_directory}')
                 except Exception as e:
                     print(f'not able to process: \n\t{os.path.join(input_directory, file)}\n\n{e}')
+
+    def preprocess_entire_dataset(self, input_dir: str, output_dir: str, allowed_file_endings=['.png']):
+        """
+        preprocesses an entire dataset recursively using self.preprocess_entire_folder
+
+        :param input_dir: directory of the dataset
+        :param output_dir:  output directory where dataset should be stored
+        :param allowed_file_endings: list of allowed file endings
+        :return:
+        """
+        self.preprocess_entire_folder(input_dir, output_dir, allowed_file_endings)
+        # For each folder call recursively
+        subdirs = [f.path for f in os.scandir(input_dir) if f.is_dir()]
+        for s in subdirs:
+            self.preprocess_entire_dataset(s,
+                                           os.path.join(output_dir, s.split('/')[-1]),
+                                           allowed_file_endings)
 
 
 if __name__ == "__main__":
     img_path = '/Users/amling/uni/shifumi/DataEng/no_hands.png'
-    test_processor = Preprocessor(remove_background=True)
-    test_processor.preprocess_entire_folder('test_images', 'test_images_out')
+    test_processor = Preprocessor(remove_background=False)
+    # test_processor.preprocess_entire_folder('test_images', 'test_images_out')
+    # test_processor.save_image(test_processor(os.path.join('test_images', '2PAcPusQ59xIMfiw.png')), 'test_images_out_wo',
+    #                          '2PAcPusQ59xIMfiw')
+    dataset = os.path.join('datasets', 'archive2')
+    out = os.path.join('datasets', 'archive2_pp_wbg')
+    test_processor.preprocess_entire_dataset(dataset, out)

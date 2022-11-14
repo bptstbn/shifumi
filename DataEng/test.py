@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import os
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -8,7 +9,7 @@ mp_hands = mp.solutions.hands
 
 # For static images:
 # TODO throw in an image and detect the hand
-IMAGE_FILES = ['/Users/amling/uni/shifumi/DataEng/test.png']
+IMAGE_FILES = [os.path.join('test_images','2PAcPusQ59xIMfiw.png')]
 
 
 def find_bounding_box(results, image_width, image_height, offest):
@@ -65,20 +66,20 @@ with mp_hands.Hands(
         image_height, image_width, _ = image.shape
         print(f' image height= {image_height} , image width= {image_width}')
         annotated_image = image.copy()
-        # for hand_landmarks in results.multi_hand_landmarks:
-        #     print('hand_landmarks:', hand_landmarks)
-        #     print(
-        #         f'Index finger tip coordinates: (',
-        #         f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width}, '
-        #         f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height})'
-        #     )
-        #     mp_drawing.draw_landmarks(
-        #         annotated_image,
-        #         hand_landmarks,
-        #         mp_hands.HAND_CONNECTIONS,
-        #         mp_drawing_styles.get_default_hand_landmarks_style(),
-        #         mp_drawing_styles.get_default_hand_connections_style())
-        #
+        for hand_landmarks in results.multi_hand_landmarks:
+            print('hand_landmarks:', hand_landmarks)
+            print(
+                f'Index finger tip coordinates: (',
+                f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width}, '
+                f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height})'
+            )
+            mp_drawing.draw_landmarks(
+                annotated_image,
+                hand_landmarks,
+                mp_hands.HAND_CONNECTIONS,
+                mp_drawing_styles.get_default_hand_landmarks_style(),
+                mp_drawing_styles.get_default_hand_connections_style())
+
         bounding_box = find_bounding_box(results, image_width, image_height, offest=10)
         print(f'bounding box = {bounding_box}')
         start_pint=(int(bounding_box[0]), int(bounding_box[2]))
