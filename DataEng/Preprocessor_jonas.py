@@ -199,6 +199,7 @@ class Preprocessor():
 
 test_processor = Preprocessor(remove_background=False)
     
+"""
 folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/webcam/train')
 rock = os.path.join(folder, 'rock')
 paper = os.path.join(folder, 'paper')
@@ -212,5 +213,9 @@ scissors_out = os.path.join(out, 'scissors')
 test_processor.preprocess_entire_dataset(rock, rock_out)
 test_processor.preprocess_entire_dataset(paper, paper_out)
 test_processor.preprocess_entire_dataset(scissors, scissors_out)
+"""
 
 
+input_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/webcam/train')
+output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/webcam/preprocessed')
+test_processor.preprocess_entire_dataset(input_dir, output_dir)
