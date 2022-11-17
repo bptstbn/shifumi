@@ -1,0 +1,11 @@
+*.aux
+*.dvi
+*.fdb_*
+*.fls
+*.log
+*.nav
+*.out
+*.pyg
+*.snm
+*.synctex.gz
+*.toc

@@ -199,10 +199,10 @@ class Preprocessor():
 
 if __name__ == "__main__":
     img_path = '/Users/amling/uni/shifumi/DataEng/no_hands.png'
-    test_processor = Preprocessor(remove_background=False)
+    test_processor = Preprocessor(remove_background=True)
     # test_processor.preprocess_entire_folder('test_images', 'test_images_out')
     # test_processor.save_image(test_processor(os.path.join('test_images', '2PAcPusQ59xIMfiw.png')), 'test_images_out_wo',
     #                          '2PAcPusQ59xIMfiw')
-    dataset = os.path.join('datasets', 'archive2')
-    out = os.path.join('datasets', 'archive2_pp_wbg')
+    dataset = os.path.join('presentation', 'img','test')
+    out = os.path.join('presentation', 'img', 'rembg')
     test_processor.preprocess_entire_dataset(dataset, out)
