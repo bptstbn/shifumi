@@ -94,7 +94,7 @@
 	\end{itemize}
 	\end{frame}
 	
-	\begin{frame}{Existing libraries}
+	\begin{frame}{Existing libraries I}
 	Searching the WWW we found some interesting libraries:
 	\begin{itemize}
 		\item YOLO-Hand-Detection: find hand position in an image \footnote{https://github.com/cansik/yolo-hand-detection}
@@ -108,8 +108,16 @@
 			\item[+] comes as library in Python Package Index 
 			\item[-] not works in all cases, has some strange edge cases
 		\end{itemize}
-		\pause
-		\item MediaPipe Hands: generates a 3d hand model from a 2d image \footnote{https://google.github.io/mediapipe/solutions/hands.html}
+	\end{itemize}
+	% YOLO library
+	% rembg library
+	% mediapipe
+	\end{frame}
+	
+	\begin{frame}{Existing libraries II}
+	Searching the WWW we found some interesting libraries:
+	\begin{itemize}
+		\item MediaPipe Hands: generates a 3d hand model from a 2d image \footnote{https://google.github.io/mediapipe/solutions/hands.html} \cite{mediapipe}
 		\begin{itemize}
 			\item[+] works quite well and comes as library in Python Package Index 
 			\item[-] developed by google
@@ -127,6 +135,7 @@
 		\item crop image, based on the hand position within the image
 		\item remove background
 	\end{itemize}
+	\pause
 	Preprocessing steps:
 	\begin{enumerate}
 	\item read image using cv2
@@ -212,6 +221,7 @@
 		\item is there a better library than rembg
 		\item how much data do we want use
 		\item do we want to train on color or greyscale images
+		\item do we want to train with MediaPipes 3d hand model
 		\item what is the exact setting in which we want to use our deep learning model
 	\end{itemize}
 	\end{frame}
