@@ -59,8 +59,6 @@ Some things to consider:
 - Principal Component analysis in order to compress images
 
 
-!!TODO!! need to check which datasets are the same
-!!TODO!! which resolution do these datasets have 
 Datasets:
 - cgi
   - [Rock Paper Scissors Dataset](https://www.kaggle.com/datasets/sanikamal/rock-paper-scissors-dataset) animated hands, white background, from above

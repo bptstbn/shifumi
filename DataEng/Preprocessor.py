@@ -16,7 +16,7 @@ from rembg import remove
 
 
 class Preprocessor():
-    def __init__(self, remove_background: bool = True, crop_image: bool = True, dim_x: int = 200, dim_y: int = 200):
+    def __init__(self, remove_background: bool = True, crop_image: bool = True, dim_x: int = 200, dim_y: int = 200, greyscale: bool = True):
         """
         constructs the Preprocessor
 
@@ -24,11 +24,13 @@ class Preprocessor():
         :param crop_image: wether or not to crop the image based on te mediapipe hand model
         :param dim_x: number of pixels in x dimension
         :param dim_y: number of pixels in y dimension
+        :param greyscale: if set to True images are preprocessed into greyscale images
         """
         self.remove_background = remove_background
         self.crop_image = crop_image
         self.desired_dimensions = (dim_y, dim_x)
         self.mp_hands = mp.solutions.hands
+        self.greyscale = greyscale
 
     def __call__(self, image_path: str):
         """
@@ -45,7 +47,8 @@ class Preprocessor():
         # remove the background
         if self.remove_background:
             image = self.__remove_bg(image)
-        # TODO bring the image into the desired format
+        if self.greyscale:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         image = self.__resize(image, self.desired_dimensions)
         # here you should return the preprocessed image
         return cv2.flip(image, 1)
@@ -199,10 +202,10 @@ class Preprocessor():
 
 if __name__ == "__main__":
     img_path = '/Users/amling/uni/shifumi/DataEng/no_hands.png'
-    test_processor = Preprocessor(remove_background=True)
+    test_processor = Preprocessor(remove_background=False, greyscale=True)
     # test_processor.preprocess_entire_folder('test_images', 'test_images_out')
     # test_processor.save_image(test_processor(os.path.join('test_images', '2PAcPusQ59xIMfiw.png')), 'test_images_out_wo',
     #                          '2PAcPusQ59xIMfiw')
-    dataset = os.path.join('presentation', 'img','test')
-    out = os.path.join('presentation', 'img', 'rembg')
+    dataset = os.path.join('datasets', 'jonas')
+    out = os.path.join('datasets', 'jonas_pp')
     test_processor.preprocess_entire_dataset(dataset, out)

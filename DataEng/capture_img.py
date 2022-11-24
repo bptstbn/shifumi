@@ -1,4 +1,5 @@
 # program to capture single image from webcam in python
+import time
 
 # importing OpenCV library
 import cv2
@@ -52,4 +53,6 @@ def capture_img(img_name = 'test', directory=os.getcwd(), show_in_window=False, 
 
 
 
-capture_img( img_name='no_hands', save_img=True, show_in_window=False)
+for x in range(120):
+    time.sleep(.5)
+    capture_img( img_name=f'paper_ja_{x}')
