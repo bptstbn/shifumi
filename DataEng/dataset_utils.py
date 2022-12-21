@@ -7,6 +7,30 @@ import os
 import random
 import shutil
 
+from DataEng.Preprocessor import Preprocessor
+
+
+def remove_images_where_no_hand_is_detected(
+        source,
+        subdirs=['rock', 'paper', 'scissors'],
+        hand_detection_confidence=.01):
+    """
+    removes all images from a dataset where mediapipe does not detect a hand
+
+    :param source: sourcefolder of dataset
+    :param subdirs: the subdirectories you want to search
+    :param hand_detection_confidence: the confidence that should be used for mediapipe hands
+    """
+    preprocessor= Preprocessor(hands_detection_confidence=hand_detection_confidence)
+    for subdir in subdirs:
+        subdirpath= os.path.join(source,subdir)
+        # now for each image check if a hand can be detected
+        for filepath in [f.path for f in os.scandir(subdirpath) if not f.is_dir()]:
+            if not preprocessor.check_if_hand_is_present(filepath):
+                print(f"no hand detected, remove: {filepath}")
+                os.remove(filepath)
+
+
 
 def sample_ds(
         source=os.path.join('datasets', 'custom'),
@@ -71,7 +95,8 @@ def rename_entire_ds(dir=os.getcwd(), leading_text=""):
         rename_entire_ds(s, leading_text)
     rename_files_in_dir(dir, leading_text)
 
-def rename_all_datasets_with_int (dir=os.path.join('datasets', 'combine')):
+
+def rename_all_datasets_with_int(dir=os.path.join('datasets', 'combined')):
     """
     renames all files for datasets in a folder with a dataset specific leading number
     
@@ -79,3 +104,6 @@ def rename_all_datasets_with_int (dir=os.path.join('datasets', 'combine')):
     """
     for cnt, ds in enumerate(os.scandir(dir)):
         rename_entire_ds(ds, str(cnt))
+
+
+remove_images_where_no_hand_is_detected(source='datasets/combined_pp_01_grey/combined')

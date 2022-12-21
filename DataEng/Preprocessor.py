@@ -16,7 +16,8 @@ from rembg import remove
 
 
 class Preprocessor():
-    def __init__(self, remove_background: bool = True, crop_image: bool = True, dim_x: int = 200, dim_y: int = 200, greyscale: bool = True):
+    def __init__(self, remove_background: bool = True, crop_image: bool = True, dim_x: int = 200, dim_y: int = 200,
+                 greyscale: bool = True, hands_detection_confidence: float = .5):
         """
         constructs the Preprocessor
 
@@ -25,12 +26,14 @@ class Preprocessor():
         :param dim_x: number of pixels in x dimension
         :param dim_y: number of pixels in y dimension
         :param greyscale: if set to True images are preprocessed into greyscale images
+        :param hands_detection_confidence: minimum hand detection confidence used by mediapipe hands
         """
         self.remove_background = remove_background
         self.crop_image = crop_image
         self.desired_dimensions = (dim_y, dim_x)
         self.mp_hands = mp.solutions.hands
         self.greyscale = greyscale
+        self.hands_detection_confidence = hands_detection_confidence
 
     def __call__(self, image_path: str):
         """
@@ -97,7 +100,7 @@ class Preprocessor():
         with self.mp_hands.Hands(
                 static_image_mode=True,
                 max_num_hands=1,
-                min_detection_confidence=0.5) as hands:
+                min_detection_confidence=self.hands_detection_confidence) as hands:
             # detect the hand using mediapipe
             results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
             # checks if hand is found
@@ -199,13 +202,35 @@ class Preprocessor():
                                            os.path.join(output_dir, s.split('/')[-1]),
                                            allowed_file_endings)
 
+    def check_if_hand_is_present(self, image_path) -> bool:
+        """
+        simple function that checks if the hand is present in a given image
+
+        :param image_path: path to the image
+        :return:
+        """
+        image = cv2.flip(cv2.imread(image_path), 1)
+        try:
+            with self.mp_hands.Hands(
+                    static_image_mode=True,
+                    max_num_hands=1,
+                    min_detection_confidence=self.hands_detection_confidence) as hands:
+                # detect the hand using mediapipe
+                results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+                # checks if hand is found
+                if results.multi_hand_landmarks:
+                    return True
+        except Exception as e:
+            print(f'failed for image: {image_path} with:\n{e}')
+        return False
+
 
 if __name__ == "__main__":
     img_path = '/Users/amling/uni/shifumi/DataEng/no_hands.png'
-    test_processor = Preprocessor(remove_background=False, greyscale=True)
+    test_processor = Preprocessor(remove_background=False, greyscale=True, hands_detection_confidence=.01)
     # test_processor.preprocess_entire_folder('test_images', 'test_images_out')
     # test_processor.save_image(test_processor(os.path.join('test_images', '2PAcPusQ59xIMfiw.png')), 'test_images_out_wo',
     #                          '2PAcPusQ59xIMfiw')
-    dataset = os.path.join('datasets', 'jonas')
-    out = os.path.join('datasets', 'jonas_pp')
+    dataset = os.path.join('datasets', 'combined')
+    out = os.path.join('datasets', 'combined_pp_01_grey')
     test_processor.preprocess_entire_dataset(dataset, out)
