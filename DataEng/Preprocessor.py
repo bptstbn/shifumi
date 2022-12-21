@@ -225,6 +225,7 @@ class Preprocessor():
         return False
 
 
+
 if __name__ == "__main__":
     img_path = '/Users/amling/uni/shifumi/DataEng/no_hands.png'
     test_processor = Preprocessor(remove_background=False, greyscale=True, hands_detection_confidence=.01)
@@ -234,3 +235,4 @@ if __name__ == "__main__":
     dataset = os.path.join('datasets', 'combined')
     out = os.path.join('datasets', 'combined_pp_01_grey')
     test_processor.preprocess_entire_dataset(dataset, out)
+
