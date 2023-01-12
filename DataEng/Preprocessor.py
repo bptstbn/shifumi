@@ -12,7 +12,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 import mediapipe as mp
-from rembg import remove
+#from rembg import remove
 
 
 class Preprocessor():
@@ -232,7 +232,7 @@ if __name__ == "__main__":
     # test_processor.preprocess_entire_folder('test_images', 'test_images_out')
     # test_processor.save_image(test_processor(os.path.join('test_images', '2PAcPusQ59xIMfiw.png')), 'test_images_out_wo',
     #                          '2PAcPusQ59xIMfiw')
-    dataset = os.path.join('datasets', 'combined')
-    out = os.path.join('datasets', 'combined_pp_01_grey')
+    dataset = os.path.join('datasets', 'xAI-Proj-M-validation_set')
+    out = os.path.join('datasets', 'xAI-Proj-M-validation_set_pp_01_grey')
     test_processor.preprocess_entire_dataset(dataset, out)
 

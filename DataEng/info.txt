@@ -1,0 +1,5 @@
+files that start with:
+0__ : webcam images dataset
+2__ : hands with green background ds
+3__ : cgi dataset, also included into tenserflow
+4__ : custom dataset by us hands + webcam data
