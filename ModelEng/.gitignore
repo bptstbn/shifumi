@@ -1,0 +1,6 @@
+# exclude all images
+**/*.png
+
+# exlude folders related to jupyter
+.ipynb_checkpoints/*
+__pycache__/*
