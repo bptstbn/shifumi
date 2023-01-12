@@ -1,9 +1,12 @@
 # program to capture single image from webcam in python
 import time
 
+import time
+
 # importing OpenCV library
 import cv2
 import os
+
 
 # initialize the camera
 # If you have multiple camera connected with 
@@ -52,7 +55,15 @@ def capture_img(img_name = 'test', directory=os.getcwd(), show_in_window=False, 
         print("No image detected. Please! try again")
 
 
+#folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/baptiste/paper')
 
-for x in range(120):
-    time.sleep(.5)
-    capture_img( img_name=f'paper_ja_{x}')
+
+#folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/baptiste/rock')
+
+folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/baptiste/scissors')
+
+for i in range(60):
+    if i == 0:
+        time.sleep(2)    
+    capture_img( img_name='bapt' + "{:02d}".format(i), directory = folder, save_img=True, show_in_window=False)
+    time.sleep(0.25)
