@@ -1,6 +1,8 @@
 # exclude pycharm stuff
 .idea
+ModelEng/datasets
 DataEng/datasets
+DataEng/data
 DataEng/out
 DataEng/test_images_out
 DataEng/test.py
