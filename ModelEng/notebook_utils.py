@@ -63,8 +63,8 @@ def show_images_from_dataloader(dataloader: DataLoader):
         # print(f"images[{i}].shape: {image.shape} ")
         image = image.transpose((1, 2, 0))
         # print(f" - AP: images[{i}].shape: {image.shape}")
-        # plt.imshow(image.squeeze(), cmap='gray')
-        plt.imshow(image.squeeze())
+        plt.imshow(image.squeeze(), cmap='gray')
+        #plt.imshow(image.squeeze())
         plt.axis('off')
     plt.show()
     plt.close()
@@ -74,6 +74,7 @@ def show_images_from_dataloader(dataloader: DataLoader):
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 # styling matplotlib
 plt.style.use('seaborn')
 sns.set_style('darkgrid')
@@ -91,28 +92,30 @@ def show_validation_loss(history, save_path=None):
     fig, ax = plt.subplots()
     ax.plot(range(len(history)), [x['loss'] for x in history])
     ax.set(xlabel='epochs', ylabel='loss',
-           title='Loss during Training')
+           title='Loss during Training (CrossEntropyLoss)')
     ax.grid()
     if save_path is not None:
         fig.savefig(save_path)
     plt.show()
 
 
-def show_training_accuracy(history, save_path=None):
+def show_training_accuracy(history, save_path=None, step_size=1):
     """
     plots the training accuracy from a history as produced by the training in notebook
 
     :param history: history as produced by training
     :param save_path:  the path the image should be saved too
+    :param step_size: step size of the x axis
     """
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots()
-    ax.plot(range(len(history)), [x['accuracy_measures']['total'] for x in history], 'r-', label="Total", linewidth=4)
-    ax.plot(range(len(history)), [x['accuracy_measures']['rock'] for x in history], 'c-', label="Rock", linewidth=1)
-    ax.plot(range(len(history)), [x['accuracy_measures']['paper'] for x in history], 'g-', label="Paper", linewidth=1)
-    ax.plot(range(len(history)), [x['accuracy_measures']['scissors'] for x in history], 'y-', label="Scissors",
+    x_val = [(x+1) * step_size for x in range(len(history))]
+    ax.plot(x_val, [x['accuracy_measures']['total'] for x in history], 'r-', label="Total", linewidth=4)
+    ax.plot(x_val, [x['accuracy_measures']['rock'] for x in history], 'c-', label="Rock", linewidth=1)
+    ax.plot(x_val, [x['accuracy_measures']['paper'] for x in history], 'g-', label="Paper", linewidth=1)
+    ax.plot(x_val, [x['accuracy_measures']['scissors'] for x in history], 'y-', label="Scissors",
             linewidth=1)
-    ax.set(xlabel='epochs', ylabel='loss',
+    ax.set(xlabel='epochs', ylabel='Accuracy in %',
            title='Accuracy in %')
     ax.grid()
     # show the labels
@@ -122,6 +125,39 @@ def show_training_accuracy(history, save_path=None):
         fig.savefig(save_path)
     plt.show()
 
+
+def show_compare_training_accuracy(histories, names, key='total', save_path=None, colors=['b-', 'g-']):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    for hist, name, color in zip(histories, names, colors):
+        ax.plot(range(len(hist)), [x['accuracy_measures'][key] for x in hist], color, label=f"{key} {name}",
+                linewidth=2)
+    ax.set(xlabel='epochs', ylabel='Accuracy in %',
+           title=f'Accuracy ({key})  in %')
+    ax.grid()
+    # show the labels
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels)
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
+
+
+def show_compare_training_loss(histories, names, save_path=None, colors=['b-', 'g-']):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    for hist, name, color in zip(histories, names, colors):
+        ax.plot(range(len(hist)), [x['loss'] for x in hist], color, label=f"Loss {name}",
+                linewidth=2)
+    ax.set(xlabel='epochs', ylabel='loss',
+           title='Loss during Training (CrossEntropyLoss)')
+    ax.grid()
+    # show the labels
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels)
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
 
 def convert_seconds(seconds):
     """
@@ -135,3 +171,29 @@ def convert_seconds(seconds):
     seconds %= 60
 
     return f"{int(hours)}:{int(minutes)}:{int(seconds)}"
+
+
+# save history to a file and reload it
+import pickle
+
+
+def save_history(save_path, object):
+    """
+    uses pickle to dub bytes of an object
+
+    :param save_path: where to save the object
+    :param object: any python object to be saved
+    """
+    with open(save_path, "wb") as fp:  # Pickling
+        pickle.dump(object, fp)
+
+
+def load_history(load_path):
+    """
+    uses pickle load to load any pickle dumped object
+
+    :param load_path: path of pickle dumped object
+    :return: loaded object using pickle load
+    """
+    with open(load_path, "rb") as fp:  # Unpickling
+        return pickle.load(fp)
