@@ -73,16 +73,16 @@ if __name__ == "__main__":
     # TODO build history for training and test
     # TODO download test and Preprocess
     # TODO train on no hands preprocessing
-    #data_loader = load_data_from_pattern(file_pattern_training_data)
+    data_loader = load_data_from_pattern(file_pattern_validation_data)
 
-    #models_wi_dropouts = get_all_model_iterations(dropouts=True)
-    #models_no_dropouts = get_all_model_iterations(dropouts=False)
-    #hist_wi_dropouts = test_accuracy_for_model_iterations(models_wi_dropouts, data_loader)
-    #hist_no_dropouts = test_accuracy_for_model_iterations(models_no_dropouts, data_loader)
+    models_wi_dropouts = get_all_model_iterations(dropouts=True)
+    models_no_dropouts = get_all_model_iterations(dropouts=False)
+    hist_wi_dropouts = test_accuracy_for_model_iterations(models_wi_dropouts, data_loader)
+    hist_no_dropouts = test_accuracy_for_model_iterations(models_no_dropouts, data_loader)
     path_hist_all_models_no_dropouts = './model_states/history__pytk_rock_paper_all_models__scissors_Dropouts_False_ds_VAL'
     path_hist_all_models_wi_dropouts = './model_states/history__pytk_rock_paper_all_models__scissors_Dropouts_True_ds_VAL'
-    #save_history(path_hist_all_models_no_dropouts, hist_no_dropouts)
-    #save_history(path_hist_all_models_wi_dropouts, hist_wi_dropouts)
+    save_history(path_hist_all_models_no_dropouts, hist_no_dropouts)
+    save_history(path_hist_all_models_wi_dropouts, hist_wi_dropouts)
     hist_no_dropouts = load_history(path_hist_all_models_no_dropouts)
     hist_wi_dropouts = load_history(path_hist_all_models_wi_dropouts)
     show_training_accuracy(hist_no_dropouts, step_size=10)
