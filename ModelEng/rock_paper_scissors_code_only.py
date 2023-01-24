@@ -18,9 +18,9 @@ CLASSES = ['rock', 'paper', 'scissors']
 model_input_size = (64, 64)
 
 
-file_pattern_training_data = '/Users/amling/uni/shifumi/DataEng/datasets/combined/combined/*/*.png'
-file_pattern_validation_data = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-validation_set_pp_01_grey/*/*.png'
-file_pattern_test_data = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-validation_set_pp_01_grey/*/*.png'
+file_pattern_training_data = '/Users/amling/uni/shifumi/DataEng/datasets/combined_grey/combined/*/*.png'
+file_pattern_validation_data = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-validation_set_grey/*/*.png'
+file_pattern_test_data = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-testing_set_grey/*/*.png'
 
 class RPS_CNN(nn.Module):
     def __init__(self, activate_dropout: bool = True, dropout_probability: float = 0.5,
@@ -140,10 +140,10 @@ def train(model, epoches, training_data, val_data, save_model_each_x_epoches=10)
             running_loss += loss.item()
         epoch_loss = running_loss / len(trainloader)
         print(f'Epoch {epoch + 1} loss: {epoch_loss}')
-        hist.append({'loss': epoch_loss, 'accuracy_measures': test_accuracy(val_data)})
+        hist.append({'loss': epoch_loss, 'accuracy_measures': test_accuracy(model,val_data)})
         if save_model_each_x_epoches > 0:
             if (epoch + 1) % save_model_each_x_epoches == 0:
-                name = f'pytk_rock_paper_scissors_{epoch + 1}epoches__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}'
+                name = f'pytk_rock_paper_scissors_NOT_PREPROCESSED_{epoch + 1}epoches__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}'
                 model_save_path = f'./model_states/{name}.pt'
                 torch.save(model.state_dict(), model_save_path)
                 hist_save_path = f'./model_states/history__{name}'
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     training_time_s = time.time() - start_time
 
     print('testing against the validation dataset')
-    test_accuracy(model,validationloader)
+    test_accuracy(model, validationloader)
 
     print('testing against the testing dataset')
     test_accuracy(model, testloader)

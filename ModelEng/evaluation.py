@@ -58,33 +58,61 @@ def load_data_from_pattern(file_pattern, batch_size=32, target_size=(64, 64), sh
     return loader
 
 
+def max_acc_from_history(hist):
+    max = None
+    index= None
+    for i,x in enumerate(hist):
+        if max is None:
+            max = x
+            index = i
+        elif x['accuracy_measures']['total']> max['accuracy_measures']['total']:
+            max = x
+            index = i
+    return index, max
+
+
+def experiment_DataEng_background_removal():
+    #TODO fix the names on the plots
+    #TODO test the models against the training data
+    #TODO also plot the distributions in the dataset
+    #TODO plot the number of not detected things from already processed data
+    history_no_dropouts = './model_states/history__pytk_rock_paper_scissors_NOT_PREPROCESSED_100epoches__Dropouts_True__BatchNorm_False'
+    history_wi_dropouts = './model_states/history__pytk_rock_paper_scissors_100epoches__Dropouts_True__BatchNorm_False'
+    show_history(history_wi_dropouts)
+    show_history(history_no_dropouts)
+    compare_histories(history_no_dropouts, history_wi_dropouts)
+
+
 if __name__ == "__main__":
     ### Playing with the actual training history
 
-    history_no_dropouts = './model_states/history__pytk_rock_paper_scissors_100epoches__Dropouts_False__BatchNorm_False'
+    history_no_dropouts = './model_states/history__pytk_rock_paper_scissors_NOT_PREPROCESSED_100epoches__Dropouts_True__BatchNorm_False'
     history_wi_dropouts = './model_states/history__pytk_rock_paper_scissors_100epoches__Dropouts_True__BatchNorm_False'
 
-    #show_history(history_wi_dropouts)
-    #show_history(history_no_dropouts)
-    #compare_histories(history_no_dropouts, history_wi_dropouts)
+    show_history(history_wi_dropouts)
+    show_history(history_no_dropouts)
+    compare_histories(history_no_dropouts, history_wi_dropouts)
 
-    ### Playing with model versions to create histories
-
-    # TODO build history for training and test
-    # TODO download test and Preprocess
-    # TODO train on no hands preprocessing
-    data_loader = load_data_from_pattern(file_pattern_validation_data)
-
-    models_wi_dropouts = get_all_model_iterations(dropouts=True)
-    models_no_dropouts = get_all_model_iterations(dropouts=False)
-    hist_wi_dropouts = test_accuracy_for_model_iterations(models_wi_dropouts, data_loader)
-    hist_no_dropouts = test_accuracy_for_model_iterations(models_no_dropouts, data_loader)
-    path_hist_all_models_no_dropouts = './model_states/history__pytk_rock_paper_all_models__scissors_Dropouts_False_ds_VAL'
-    path_hist_all_models_wi_dropouts = './model_states/history__pytk_rock_paper_all_models__scissors_Dropouts_True_ds_VAL'
-    save_history(path_hist_all_models_no_dropouts, hist_no_dropouts)
-    save_history(path_hist_all_models_wi_dropouts, hist_wi_dropouts)
-    hist_no_dropouts = load_history(path_hist_all_models_no_dropouts)
-    hist_wi_dropouts = load_history(path_hist_all_models_wi_dropouts)
-    show_training_accuracy(hist_no_dropouts, step_size=10)
-    show_training_accuracy(hist_wi_dropouts, step_size=10)
-    compare_histories(path_hist_all_models_no_dropouts, path_hist_all_models_wi_dropouts, compare_loss=False)
+    # ### Playing with model versions to create histories
+    #
+    # # TODO build history for training
+    # # TODO train,val, and test on no hands preprocessing
+    # #data_loader = load_data_from_pattern(file_pattern_test_data)
+    #
+    # #models_wi_dropouts = get_all_model_iterations(dropouts=True)
+    # #models_no_dropouts = get_all_model_iterations(dropouts=False)
+    # #hist_wi_dropouts = test_accuracy_for_model_iterations(models_wi_dropouts, data_loader)
+    # #hist_no_dropouts = test_accuracy_for_model_iterations(models_no_dropouts, data_loader)
+    # path_hist_all_models_no_dropouts = './model_states/history__pytk_rock_paper_all_models__scissors_Dropouts_False_ds_VAL'
+    # path_hist_all_models_wi_dropouts = './model_states/history__pytk_rock_paper_all_models__scissors_Dropouts_True_ds_VAL'
+    # #save_history(path_hist_all_models_no_dropouts, hist_no_dropouts)
+    # #save_history(path_hist_all_models_wi_dropouts, hist_wi_dropouts)
+    # hist_no_dropouts = load_history(path_hist_all_models_no_dropouts)
+    # hist_wi_dropouts = load_history(path_hist_all_models_wi_dropouts)
+    # show_training_accuracy(hist_no_dropouts, step_size=10)
+    # show_training_accuracy(hist_wi_dropouts, step_size=10)
+    # compare_histories(path_hist_all_models_no_dropouts, path_hist_all_models_wi_dropouts, compare_loss=False)
+    # index, max = max_acc_from_history(hist_no_dropouts)
+    # print(f'max no dropouts {max} at {(index+1)*10}')
+    # index, max = max_acc_from_history(hist_wi_dropouts)
+    # print(f'max with dropouts {max} at {(index + 1) * 10}')
