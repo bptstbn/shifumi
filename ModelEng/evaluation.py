@@ -1,6 +1,14 @@
 from rock_paper_scissors_code_only import *
 import torch
 
+# TODO add me
+file_pattern_training_data_wo_hands = ''
+file_pattern_training_data_wi_hands = ''
+file_pattern_validation_data_wo_hands = ''
+file_pattern_validation_data_wi_hands = ''
+file_pattern_testing_data_wo_hands = ''
+file_pattern_testing_data_wi_hands = ''
+
 
 def show_history(hist_path):
     hist = load_history(hist_path)
@@ -60,27 +68,53 @@ def load_data_from_pattern(file_pattern, batch_size=32, target_size=(64, 64), sh
 
 def max_acc_from_history(hist):
     max = None
-    index= None
-    for i,x in enumerate(hist):
+    index = None
+    for i, x in enumerate(hist):
         if max is None:
             max = x
             index = i
-        elif x['accuracy_measures']['total']> max['accuracy_measures']['total']:
+        elif x['accuracy_measures']['total'] > max['accuracy_measures']['total']:
             max = x
             index = i
     return index, max
 
 
 def experiment_DataEng_background_removal():
-    #TODO fix the names on the plots
-    #TODO test the models against the training data
-    #TODO also plot the distributions in the dataset
-    #TODO plot the number of not detected things from already processed data
-    history_no_dropouts = './model_states/history__pytk_rock_paper_scissors_NOT_PREPROCESSED_100epoches__Dropouts_True__BatchNorm_False'
-    history_wi_dropouts = './model_states/history__pytk_rock_paper_scissors_100epoches__Dropouts_True__BatchNorm_False'
-    show_history(history_wi_dropouts)
-    show_history(history_no_dropouts)
-    compare_histories(history_no_dropouts, history_wi_dropouts)
+    # TODO fix the names on the plots
+    # TODO test the models against the training data
+    training_history_no_dropouts = './model_states/history__pytk_rock_paper_scissors_NOT_PREPROCESSED_100epoches__Dropouts_True__BatchNorm_False'
+    training_history_wi_dropouts = './model_states/history__pytk_rock_paper_scissors_100epoches__Dropouts_True__BatchNorm_False'
+    show_history(training_history_wi_dropouts)
+    show_history(training_history_no_dropouts)
+    compare_histories(training_history_no_dropouts, training_history_wi_dropouts)
+
+    model_trained_wo_hands_name = ''
+    model_trained_wi_hands_name = ''
+    path_hist_all_models_no_hands_det = f'./model_states/history__{model_trained_wo_hands_name}'
+    path_hist_all_models_wi_hands_det = f'./model_states/history__{model_trained_wi_hands_name}'
+    models_NO_hands_detection = get_all_model_iterations(dropouts=True, model_name=model_trained_wo_hands_name)
+    models_hands_detection = get_all_model_iterations(dropouts=True, model_name=model_trained_wi_hands_name)
+
+    # Load all data for comparison
+    data_loader_training_data_wo_hands = load_data_from_pattern(file_pattern_training_data_wo_hands)
+    data_loader_training_data_wi_hands = load_data_from_pattern(file_pattern_training_data_wi_hands)
+    data_loader_validation_data_wo_hands = load_data_from_pattern(file_pattern_validation_data_wo_hands)
+    data_loader_validation_data_wi_hands = load_data_from_pattern(file_pattern_validation_data_wi_hands)
+    data_loader_testing_data_wo_hands = load_data_from_pattern(file_pattern_testing_data_wo_hands)
+    data_loader_testing_data_wi_hands = load_data_from_pattern(file_pattern_testing_data_wi_hands)
+    # TODO generate all six histories train val test all images
+    # hist_wi_dropouts = test_accuracy_for_model_iterations(models_wi_dropouts, data_loader)
+    # TODO save all the 6 histories
+    # save_history(path_hist_all_models_wi_dropouts, hist_wi_dropouts)
+    # TODO load all the 6 histories
+    # hist_no_dropouts = load_history(path_hist_all_models_no_dropouts)
+    # TODO show the 6 accuracies
+    # show_training_accuracy(hist_no_dropouts, step_size=10)
+    # TODO compare 3 accuracies
+    # compare_histories(path_hist_all_models_no_dropouts, path_hist_all_models_wi_dropouts, compare_loss=False)
+    # TODO Compare testing set performance on unknown dataset
+    # run 2x performance on other testing dataset
+    # get the 2 accuracy plots and comparison of total
 
 
 if __name__ == "__main__":
