@@ -126,11 +126,12 @@ def show_training_accuracy(history, save_path=None, step_size=1):
     plt.show()
 
 
-def show_compare_training_accuracy(histories, names, key='total', save_path=None, colors=['b-', 'g-']):
+def show_compare_training_accuracy(histories, names, key='total', save_path=None, colors=['b-', 'g-'], step_size = 1):
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots()
     for hist, name, color in zip(histories, names, colors):
-        ax.plot(range(len(hist)), [x['accuracy_measures'][key] for x in hist], color, label=f"{key} {name}",
+        x_val = [(x+1) * step_size for x in range(len(hist))]
+        ax.plot(x_val, [x['accuracy_measures'][key] for x in hist], color, label=f"{name}",
                 linewidth=2)
     ax.set(xlabel='epochs', ylabel='Accuracy in %',
            title=f'Accuracy ({key})  in %')
@@ -143,11 +144,12 @@ def show_compare_training_accuracy(histories, names, key='total', save_path=None
     plt.show()
 
 
-def show_compare_training_loss(histories, names, save_path=None, colors=['b-', 'g-']):
+def show_compare_training_loss(histories, names, save_path=None, colors=['b-', 'g-'], step_size=1):
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots()
     for hist, name, color in zip(histories, names, colors):
-        ax.plot(range(len(hist)), [x['loss'] for x in hist], color, label=f"Loss {name}",
+        x_val = [(x + 1) * step_size for x in range(len(hist))]
+        ax.plot(x_val, [x['loss'] for x in hist], color, label=f"{name}",
                 linewidth=2)
     ax.set(xlabel='epochs', ylabel='loss',
            title='Loss during Training (CrossEntropyLoss)')
