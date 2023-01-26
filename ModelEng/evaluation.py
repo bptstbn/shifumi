@@ -50,7 +50,7 @@ def get_all_model_iterations(model_name='pytk_rock_paper_scissors', dropouts=Tru
         iter += step
     models = []
     for path in model_paths:
-        model = RPS_CNN()
+        model = RPS_CNN(name=path)
         model.load_state_dict(torch.load(path))
         model.eval()
         models.append({'model': model, 'name': path})
@@ -91,12 +91,10 @@ def max_acc_from_history(hist):
 
 def experiment_DataEng_background_removal(output_dir='./experiment_DataEng/', generate_data=False,
                                           show_data_loader_images=False):
-    # TODO fix the names on the plots
     training_history_no_preprocessing = './model_states/history__pytk_rock_paper_scissors_NOT_PREPROCESSED_100epoches__Dropouts_True__BatchNorm_False'
     training_history_wi_preprocessing = './model_states/history__pytk_rock_paper_scissors_100epoches__Dropouts_True__BatchNorm_False'
     hist_training_history_no_preprocessing = load_history(training_history_no_preprocessing)
     hist_training_history_wi_preprocessing = load_history(training_history_wi_preprocessing)
-    # TODO implement save path
     show_history(hist_training_history_no_preprocessing, save_path=f'{output_dir}model_no_pp_complete_training')
     show_history(hist_training_history_wi_preprocessing, save_path=f'{output_dir}model_wi_pp_complete_training')
     compare_histories(hist_one=hist_training_history_no_preprocessing, hist_one_name='without hands detection',
@@ -107,8 +105,9 @@ def experiment_DataEng_background_removal(output_dir='./experiment_DataEng/', ge
     model_trained_wi_hands_name = 'pytk_rock_paper_scissors'
     path_hist_all_models_no_hands_det = f'{output_dir}history__{model_trained_wo_hands_name}'
     path_hist_all_models_wi_hands_det = f'{output_dir}history__{model_trained_wi_hands_name}'
-    models_NO_hands_detection = get_all_model_iterations(dropouts=True, model_name=model_trained_wo_hands_name)
-    models_hands_detection = get_all_model_iterations(dropouts=True, model_name=model_trained_wi_hands_name)
+    if generate_data:
+        models_NO_hands_detection = get_all_model_iterations(dropouts=True, model_name=model_trained_wo_hands_name)
+        models_hands_detection = get_all_model_iterations(dropouts=True, model_name=model_trained_wi_hands_name)
 
     if generate_data or show_data_loader_images:
         # Load all data for comparison

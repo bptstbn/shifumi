@@ -13,19 +13,19 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-
 CLASSES = ['rock', 'paper', 'scissors']
 model_input_size = (64, 64)
-
 
 file_pattern_training_data = '/Users/amling/uni/shifumi/DataEng/datasets/combined_grey/combined/*/*.png'
 file_pattern_validation_data = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-validation_set_grey/*/*.png'
 file_pattern_test_data = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-testing_set_grey/*/*.png'
 
+
 class RPS_CNN(nn.Module):
-    def __init__(self, activate_dropout: bool = True, dropout_probability: float = 0.5,
+    def __init__(self, name, activate_dropout: bool = True, dropout_probability: float = 0.5,
                  batch_normalization: bool = False, convolution_kernel_size: int = 3):
         super(RPS_CNN, self).__init__()
+        self.name = name
         self.activate_dropout = activate_dropout
         self.dropout_probability = dropout_probability
         self.batch_normalization = batch_normalization
@@ -94,10 +94,11 @@ class RPS_CNN(nn.Module):
         return x
 
 
-def test_accuracy(model, testloader):
+def test_accuracy(model, testloader, criterion=None):
     # Test the model on the test dataset
     print("test accuracy called")
     outcome = {}
+    running_loss = 0.0
     with torch.no_grad():
         correct = 0
         total = 0
@@ -105,6 +106,9 @@ def test_accuracy(model, testloader):
         class_total = [0. for i in range(len(CLASSES))]
         for inputs, labels in testloader:
             outputs = model(inputs)
+            if criterion:
+                loss = criterion(outputs, labels)
+                running_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
@@ -121,7 +125,7 @@ def test_accuracy(model, testloader):
                 outcome[CLASSES[i]] = 100 * class_correct[i] / class_total[i]
             else:
                 print(f'Accuracy of {CLASSES[i]} : could not be measured, no test images%')
-    return outcome
+    return outcome, loss
 
 
 def train(model, epoches, training_data, val_data, save_model_each_x_epoches=10):
@@ -140,10 +144,11 @@ def train(model, epoches, training_data, val_data, save_model_each_x_epoches=10)
             running_loss += loss.item()
         epoch_loss = running_loss / len(trainloader)
         print(f'Epoch {epoch + 1} loss: {epoch_loss}')
-        hist.append({'loss': epoch_loss, 'accuracy_measures': test_accuracy(model,val_data)})
+        val_outcome, val_loss = test_accuracy(model, val_data, criterion)
+        hist.append({'loss': epoch_loss, 'val_loss': val_loss, 'accuracy_measures': val_outcome})
         if save_model_each_x_epoches > 0:
             if (epoch + 1) % save_model_each_x_epoches == 0:
-                name = f'pytk_rock_paper_scissors_NOT_PREPROCESSED_{epoch + 1}epoches__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}'
+                name = f'./model_state/{model.name}_{epoch + 1}epoches__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}'
                 model_save_path = f'./model_states/{name}.pt'
                 torch.save(model.state_dict(), model_save_path)
                 hist_save_path = f'./model_states/history__{name}'
@@ -173,8 +178,8 @@ class RPSDataset(Dataset):
 
 train_transforms = transforms.Compose([
     transforms.ToTensor(),
-    transforms.RandomAffine(0, shear=0.2),  # random shear 0.2
-    transforms.RandomAffine(0, scale=(0.8, 1.2)),  # random zoom 0.2
+    transforms.RandomAffine(0, shear=0.2),
+    transforms.RandomAffine(0, scale=(0.8, 1.2)),
     transforms.RandomRotation(20),
     transforms.RandomHorizontalFlip(),
     transforms.RandomVerticalFlip(),
@@ -218,10 +223,6 @@ if __name__ == "__main__":
         torch.backends.cudnn.benchmark = False
         # torch.backends.cudnn.enabled = False
 
-
-
-
-
     train_images, train_labels, train_data_paths = get_images_and_labels_from_filepattern(file_pattern_training_data,
                                                                                           model_input_size)
     val_images, val_labels, val_data_paths = get_images_and_labels_from_filepattern(file_pattern_validation_data,
@@ -237,6 +238,7 @@ if __name__ == "__main__":
     print(f"test data from {test_data_paths[:2]}\n")
 
     # definition of parameters
+    model_name = 'abc'
     batch_size = 64
     training_epoches = 100
     use_batch_normalization = False
@@ -260,7 +262,7 @@ if __name__ == "__main__":
     show_images_from_dataloader(validationloader)
 
     # Define the model, loss function, and optimizer
-    model = RPS_CNN(activate_dropout=use_dropouts, dropout_probability=dropout_probability,
+    model = RPS_CNN(name=model_name, activate_dropout=use_dropouts, dropout_probability=dropout_probability,
                     batch_normalization=use_batch_normalization)
     model = model.to(device=device)
     criterion = nn.CrossEntropyLoss()
@@ -285,7 +287,7 @@ if __name__ == "__main__":
 
     # plot the validation loss during training
     show_validation_loss(hist,
-                         save_path=f'./model_states/{training_epoches}epoches_val_loss__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}.png')
+                         save_path=f'./model_states/{model_name}_{training_epoches}epoches_val_loss__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}.png')
     # plot the validation loss
     show_training_accuracy(hist,
-                           save_path=f'./model_states/{training_epoches}epoches_accuracy__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}.png')
+                           save_path=f'./model_states/{model_name}_{training_epoches}epoches_accuracy__Dropouts_{str(model.activate_dropout)}__BatchNorm_{str(model.batch_normalization)}.png')
