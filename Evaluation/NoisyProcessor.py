@@ -10,7 +10,7 @@ def remove_parts_transformation(image_path):
     image = cv2.imread(image_path)
 
     # Generate a random mask
-    mask = np.random.rand(image.shape[0], image.shape[1]) < 0.25 # 0.25 is the probability of a pixel to be removed
+    mask = np.random.rand(image.shape[0], image.shape[1]) < 0.25  # 0.25 is the probability of a pixel to be removed
     image[mask] = [0, 0, 0]
     return image
 
@@ -37,6 +37,7 @@ def apply_gaussian_noise(image_path, std=25, black_and_white=True):
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
 
     return image
+
 
 def show_image_before_after_rm(image_path, prob):
     """
@@ -131,16 +132,16 @@ def process_images_in_folder(input_folder: str, output_folder: str, image_transf
 
 
 if __name__ == '__main__':
-
     # single picture
 
-    #data_path = "datasets/testset/paper/paper5.png"
+    data_path = "/home/divingsoup/Documents/Uni-Bamberg/Semester5/ProjectXDeepLearning/shifumi/DataEng/datasets/combined/paper/0__glu_10.png"
     #show_image_before_after_rm(data_path, 0.25)
-    #show_image_before_after_noise(data_path, 25, True)
-    #show_image_before_after_noise(data_path, 255, False)
+    show_image_before_after_noise(data_path, 25, True)
+    # show_image_before_after_noise(data_path, 255, False)
 
     # folder
 
-    process_images_in_folder("datasets/testset", "datasets/testset_rm_noise", remove_parts_transformation)
-    process_images_in_folder("datasets/testset", "datasets/testset_gaussian_noise", apply_gaussian_noise)
-
+    # process_images_in_folder("/home/divingsoup/Documents/Uni-Bamberg/Semester5/ProjectXDeepLearning/shifumi/DataEng/datasets/unseen_testdata",
+    #                        "/home/divingsoup/Documents/Uni-Bamberg/Semester5/ProjectXDeepLearning/shifumi/DataEng/datasets/unseen_testdata_randomNoise", remove_parts_transformation)
+    # process_images_in_folder("/home/divingsoup/Documents/Uni-Bamberg/Semester5/ProjectXDeepLearning/shifumi/DataEng/datasets/unseen_testdata",
+    #                        "/home/divingsoup/Documents/Uni-Bamberg/Semester5/ProjectXDeepLearning/shifumi/DataEng/datasets/unseen_testdata_gaussianNoise", apply_gaussian_noise)
