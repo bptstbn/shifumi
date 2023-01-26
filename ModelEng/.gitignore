@@ -2,6 +2,6 @@
 **/*.png
 
 # exlude folders related to jupyter
-.ipynb_checkpoints/*
+.ipynb_checkpoints/
 __pycache__/*
 experiment_DataEng
