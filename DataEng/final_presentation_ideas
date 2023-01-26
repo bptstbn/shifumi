@@ -1,0 +1,20 @@
+Overall:
+
+1: DataEng
+    use slides from 1st lecture
+    - ResearchQuestion and how to test it
+    - Creation of out train/val/test dataset -> figure and tables from evaluation
+    - Accuracy of Mediapipe Hands and value selection -> You should make a graph only on testing set....
+    - Experiment:
+        H0:
+            Same model, different training data , same result?
+        Method:
+            compare training and validation step (100 and 10 timepoints)
+        Results:
+            compare accuracy on validation set 100 times  big:accuracy comapre + 2x small individual verlauf detailes
+            compare accuracy on training testing set 10 times: big accuracy compare+ 3x small class compare
+            on dif preprocess testing data accuracy: same as above 1x3
+            finally a slide with short results overview
+    - Conclusion: does it help? -> yes
+2: ModelEng
+3: ModelEval

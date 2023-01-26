@@ -2,9 +2,12 @@
 import os
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from DataEng.Preprocessor import Preprocessor
 
+# styling matplotlib
+plt.style.use('seaborn')
 
 def generate_dataframe(dir: str = os.getcwd(), preprocessor: Preprocessor = None) -> pd.DataFrame:
     """
@@ -83,6 +86,9 @@ def analyse_outcome():
     analysis_folder = '/Users/amling/uni/shifumi/DataEng/analysis'
 
     total = pd.read_csv(os.path.join(analysis_folder, "total.csv"))
+    fig = total.plot.bar(x='Origin', rot=0)
+    plt.title('Composition of Training Dataset from Different Origins')
+    plt.show()
     print(expand_df(total))
     confidence_df = {}
 
@@ -92,8 +98,11 @@ def analyse_outcome():
         confidence_df[hand_confidence] = frame
 
     for hand_confidence, frame in zip(confidence_df, confidence_df.values()):
+        #fig = frame.plot.bar(x='Origin')
+        #plt.show()
+        df = expand_df(frame)
         print(
-            f'hand_confidence: {hand_confidence} \n{expand_df(frame)}\n{calculate_percentage(expand_df(frame), expand_df(total))}')
+            f'hand_confidence: {hand_confidence} \n{df}\n{calculate_percentage(expand_df(frame), expand_df(total))}')
 
 
 # ds = '/Users/amling/uni/shifumi/DataEng/datasets/combined/combined'

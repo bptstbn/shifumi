@@ -88,7 +88,7 @@ class Preprocessor():
         :param image: image, cv2.imread
         :return: image, with transparent background
         """
-        return remove(image)
+        return None #remove(image)
 
     def __crop_image(self, image):
         """
@@ -174,7 +174,7 @@ class Preprocessor():
         # TODO make sure this works on windows
         cv2.imwrite(os.path.join(directory, f'{name}.png'), image)
 
-    def preprocess_entire_folder(self, input_directory, output_directory, allowed_file_endings=['.png']):
+    def preprocess_entire_folder(self, input_directory, output_directory, allowed_file_endings=['.png','.jpeg']):
         print(f'process all files ind {input_directory}')
         for file in os.listdir(input_directory):
             if file.endswith(tuple(allowed_file_endings)):
@@ -185,7 +185,7 @@ class Preprocessor():
                 except Exception as e:
                     print(f'not able to process: \n\t{os.path.join(input_directory, file)}\n\n{e}')
 
-    def preprocess_entire_dataset(self, input_dir: str, output_dir: str, allowed_file_endings=['.png']):
+    def preprocess_entire_dataset(self, input_dir: str, output_dir: str, allowed_file_endings=['.png', 'jpg']):
         """
         preprocesses an entire dataset recursively using self.preprocess_entire_folder
 
@@ -228,11 +228,11 @@ class Preprocessor():
 
 if __name__ == "__main__":
     img_path = '/Users/amling/uni/shifumi/DataEng/no_hands.png'
-    test_processor = Preprocessor(remove_background=False, greyscale=True, hands_detection_confidence=.01)
+    test_processor = Preprocessor(remove_background=False, greyscale=True, hands_detection_confidence=.01, crop_image=False)
     # test_processor.preprocess_entire_folder('test_images', 'test_images_out')
     # test_processor.save_image(test_processor(os.path.join('test_images', '2PAcPusQ59xIMfiw.png')), 'test_images_out_wo',
     #                          '2PAcPusQ59xIMfiw')
-    dataset = os.path.join('datasets', 'xAI-Proj-M-validation_set')
-    out = os.path.join('datasets', 'xAI-Proj-M-validation_set_pp_01_grey')
+    dataset = os.path.join('datasets', 'combined')
+    out = os.path.join('datasets', 'combined_grey')
     test_processor.preprocess_entire_dataset(dataset, out)
 
