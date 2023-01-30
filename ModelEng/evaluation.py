@@ -1,3 +1,8 @@
+import os
+
+# set file path as working directory
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 from rock_paper_scissors_code_only import *
 import torch
 
@@ -7,6 +12,9 @@ file_pattern_validation_data_wo_hands = '/Users/amling/uni/shifumi/DataEng/datas
 file_pattern_validation_data_wi_hands = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-validation_set_pp_01_grey/*/*.png'
 file_pattern_testing_data_wo_hands = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-testing_set_grey/*/*.png'
 file_pattern_testing_data_wi_hands = '/Users/amling/uni/shifumi/DataEng/datasets/xAI-Proj-M-testing_set_pp_01_grey/*/*.png'
+
+
+
 
 
 def show_history(hist, save_path = None):
@@ -45,7 +53,7 @@ def get_all_model_iterations(model_name='pytk_rock_paper_scissors', dropouts=Tru
     model_paths = []
     iter = start_iterations
     while (iter <= stop_iterations):
-        path = f'./model_states/{model_name}_{iter}epoches__Dropouts_{str(dropouts)}__BatchNorm_{str(batch_norm)}.pt'
+        path = f'{os.getcwd()}/model_states/model_state/{model_name}_{iter}epoches__Dropouts_{str(dropouts)}__BatchNorm_{str(batch_norm)}.pt'
         model_paths.append(path)
         iter += step
     models = []
@@ -194,6 +202,89 @@ def experiment_DataEng_background_removal(output_dir='./experiment_DataEng/', ge
     # get the 2 accuracy plots and comparison of total
 
 
+
+def show_compare_testing_accuracy(histories, names, key='total', save_path=None, colors=['b-', 'g-'], step_size = 10):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    for hist, name, color in zip(histories, names, colors):
+        x_val = [(x+1) * step_size for x in range(len(hist))]
+        ax.plot(x_val, [x['accuracy_measures'][0][key] for x in hist], color, label=f"{name}",
+                linewidth=2)
+    ax.set(xlabel='epochs', ylabel='Accuracy in %',
+           title=f'Accuracy ({key})  in %')
+    ax.grid()
+    # show the labels
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels)
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
+
+
+
+def baptiste_test():
+    file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-testing_set_grey/*/*.png'
+    test_loader = load_data_from_pattern(file_pattern, batch_size=32, target_size=(64, 64), show_images=True)
+    histories = []
+    for batch_norm in [False, True]:
+        for dropouts in [False, True]:
+        
+            model_iterations = get_all_model_iterations(model_name='baptiste', dropouts=dropouts, batch_norm=batch_norm,
+                                 start_iterations=10, stop_iterations=100, step=10)
+            hist = test_accuracy_for_model_iterations(model_iterations, test_loader)
+            print('BatchNorm' + str(batch_norm))
+            print('Dropout' + str(dropouts))
+            path = f'{os.getcwd()}/model_states/figures/baptiste_100_epoches_test_accuracy__Dropouts_{str(dropouts)}__BatchNorm_{str(batch_norm)}.png'
+            # show_training_accuracy(hist, step_size=10, save_path = path)
+            histories.append(hist)
+    path = f'{os.getcwd()}/model_states/figures/baptiste_test_accuracies_comparison.png'  
+    names = ['No regularization', 'Dropout', 'BatchNorm', 'Dropout & BatchNorm']
+    show_compare_testing_accuracy(histories, names, key='total', save_path=path, colors=['b-', 'g-', 'r-', 'black'], step_size = 10)
+            
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import pandas as pd
+
+
+def create_confusion_matrix():
+    y_pred = []
+    y_true = []
+
+    file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-testing_set_grey/*/*.png'
+    testloader = load_data_from_pattern(file_pattern, batch_size=32, target_size=(64, 64), show_images=True)
+    
+    batch_norm = False
+    dropouts = True
+                         
+    model = get_all_model_iterations(model_name='baptiste', dropouts=dropouts, batch_norm=batch_norm,
+                         start_iterations=100, stop_iterations=100, step=10)[0]['model']
+    
+    print(model)
+    # iterate over test data
+    for inputs, labels in testloader:
+        output = model(inputs) # Feed Network
+
+        output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
+        y_pred.extend(output) # Save Prediction
+        
+        labels = labels.data.cpu().numpy()
+        y_true.extend(labels) # Save Truth
+
+    # constant for classes
+    classes = ('Rock', 'Paper', 'Scissors')
+
+    #Build confusion matrix
+    cf_matrix = confusion_matrix(y_true, y_pred)
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1), index = [i for i in classes],
+                    columns = [i for i in classes])
+    plt.figure(figsize = (12,7))
+    sn.heatmap(df_cm, annot=True)
+    #plt.savefig('output.png')
+            
 if __name__ == "__main__":
     # to see all implemented methods look at my experiment
-    experiment_DataEng_background_removal()
+    #experiment_DataEng_background_removal()
+    # baptiste_test()
+    create_confusion_matrix()

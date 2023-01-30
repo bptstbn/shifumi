@@ -90,10 +90,14 @@ def show_validation_loss(history, save_path=None):
     """
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots()
-    ax.plot(range(len(history)), [x['loss'] for x in history])
+    ax.plot(range(len(history)), [x['loss'] for x in history], label = 'Training Loss')
+    ax.plot(range(len(history)), [x['val_loss'] for x in history], label = 'Validation Loss')
     ax.set(xlabel='epochs', ylabel='loss',
            title='Loss during Training (CrossEntropyLoss)')
     ax.grid()
+    # show the labels
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels)
     if save_path is not None:
         fig.savefig(save_path)
     plt.show()
@@ -110,10 +114,10 @@ def show_training_accuracy(history, save_path=None, step_size=1):
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots()
     x_val = [(x+1) * step_size for x in range(len(history))]
-    ax.plot(x_val, [x['accuracy_measures']['total'] for x in history], 'r-', label="Total", linewidth=4)
-    ax.plot(x_val, [x['accuracy_measures']['rock'] for x in history], 'c-', label="Rock", linewidth=1)
-    ax.plot(x_val, [x['accuracy_measures']['paper'] for x in history], 'g-', label="Paper", linewidth=1)
-    ax.plot(x_val, [x['accuracy_measures']['scissors'] for x in history], 'y-', label="Scissors",
+    ax.plot(x_val, [x['accuracy_measures'][0]['total'] for x in history], 'r-', label="Total", linewidth=4)
+    ax.plot(x_val, [x['accuracy_measures'][0]['rock'] for x in history], 'c-', label="Rock", linewidth=1)
+    ax.plot(x_val, [x['accuracy_measures'][0]['paper'] for x in history], 'g-', label="Paper", linewidth=1)
+    ax.plot(x_val, [x['accuracy_measures'][0]['scissors'] for x in history], 'y-', label="Scissors",
             linewidth=1)
     ax.set(xlabel='epochs', ylabel='Accuracy in %',
            title='Accuracy in %')
@@ -199,3 +203,61 @@ def load_history(load_path):
     """
     with open(load_path, "rb") as fp:  # Unpickling
         return pickle.load(fp)
+
+
+
+# set file path as working directory
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+
+h1 = load_history(os.getcwd() + '\model_states\history__baptiste_100epoches__Dropouts_False__BatchNorm_False')
+h2 = load_history(os.getcwd() + '\model_states\history__baptiste_100epoches__Dropouts_True__BatchNorm_False')
+h3 = load_history(os.getcwd() + '\model_states\history__baptiste_100epoches__Dropouts_False__BatchNorm_True')
+h4 = load_history(os.getcwd() + '\model_states\history__baptiste_100epoches__Dropouts_True__BatchNorm_True')
+
+
+histories = [h1, h2, h3, h4]
+names = ['No regularization', 'Dropout', 'BatchNorm', 'Dropout & BatchNorm']
+
+savepath = f'{os.getcwd()}\model_states\obaptiste_val_accuracies_comparison'
+
+show_compare_training_accuracy(histories, names, key='total', save_path=savepath, colors=['b-', 'g-', 'r-', 'black'], step_size = 1)
+
+
+
+def show_training_and_val_accuracy(history, save_path=None, step_size=1):
+    """
+    plots the training accuracy from a history as produced by the training in notebook
+
+    :param history: history as produced by training
+    :param save_path:  the path the image should be saved too
+    :param step_size: step size of the x axis
+    """
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    x_val = [(x+1) * step_size for x in range(len(history))]
+    ax.plot(x_val, [x['training_accuracy'] for x in history], 'b-', label="Training Accuracy", linewidth=1)
+    ax.plot(x_val, [x['accuracy_measures']['total'] for x in history], 'g-', label="Validation Accuracy", linewidth=1)
+    ax.set(xlabel='epochs', ylabel='Accuracy in %',
+           title='Accuracy in %')
+    ax.grid()
+    # show the labels
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels)
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
+
+
+
+
+"""
+for dropout in [True, False]:
+    for batchnorm in [True, False]:
+        h = load_history(os.getcwd() + '\model_states\history__baptiste_100epoches__Dropouts_' + str(dropout) + '__BatchNorm_' + str(batchnorm))
+        savepath = f'{os.getcwd()}\model_states\obaptiste_100epoches_train_accuracy__Dropouts_{str(dropout)}__BatchNorm_{str(batchnorm)}'
+        show_training_and_val_accuracy(h, savepath)
+"""
+                               
+                               
