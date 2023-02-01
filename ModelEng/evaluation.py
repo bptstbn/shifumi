@@ -224,7 +224,7 @@ def show_compare_testing_accuracy(histories, names, key='total', save_path=None,
 
 def baptiste_test():
     file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-testing_set_grey/*/*.png'
-    test_loader = load_data_from_pattern(file_pattern, batch_size=32, target_size=(64, 64), show_images=True)
+    test_loader = load_data_from_pattern(file_pattern, batch_size=64, target_size=(64, 64), show_images=True)
     histories = []
     for batch_norm in [False, True]:
         for dropouts in [False, True]:
@@ -248,11 +248,16 @@ import seaborn as sn
 import pandas as pd
 
 
+from sklearn.metrics import classification_report
+
 def create_confusion_matrix():
     y_pred = []
     y_true = []
 
     file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-testing_set_grey/*/*.png'
+    #file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-validation_set_grey/*/*.png'
+    #file_pattern = 'C:/Users/bapti/Documents/Data/combined_grey/combined/*/*.png'
+
     testloader = load_data_from_pattern(file_pattern, batch_size=32, target_size=(64, 64), show_images=True)
     
     batch_norm = False
@@ -260,7 +265,7 @@ def create_confusion_matrix():
                          
     model = get_all_model_iterations(model_name='baptiste', dropouts=dropouts, batch_norm=batch_norm,
                          start_iterations=100, stop_iterations=100, step=10)[0]['model']
-    
+    model.eval()
     print(model)
     # iterate over test data
     for inputs, labels in testloader:
@@ -274,17 +279,47 @@ def create_confusion_matrix():
 
     # constant for classes
     classes = ('Rock', 'Paper', 'Scissors')
+    
+    print(classification_report(y_true, y_pred, labels = [0, 1, 2], target_names = classes))
 
-    #Build confusion matrix
+
     cf_matrix = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1), index = [i for i in classes],
                     columns = [i for i in classes])
     plt.figure(figsize = (12,7))
     sn.heatmap(df_cm, annot=True)
     #plt.savefig('output.png')
-            
+
+
+def get_accuracies():
+    file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-testing_set_grey/*/*.png'
+    file_pattern = 'C:/Users/bapti/Documents/Data/xAI-Proj-M-validation_set_grey/*/*.png'
+    test_loader = load_data_from_pattern(file_pattern, batch_size=64, target_size=(64, 64), show_images=True)
+    histories = []
+    batch_norm = False
+    dropouts = True
+        
+    model_iterations = get_all_model_iterations(model_name='baptiste', dropouts=dropouts, batch_norm=batch_norm,
+                         start_iterations=10, stop_iterations=100, step=10)
+    hist = test_accuracy_for_model_iterations(model_iterations, test_loader)
+    print('BatchNorm' + str(batch_norm))
+    print('Dropout' + str(dropouts))
+    path = f'{os.getcwd()}/model_states/figures/baptiste_100_epoches_test_accuracy__Dropouts_{str(dropouts)}__BatchNorm_{str(batch_norm)}.png'
+    # show_training_accuracy(hist, step_size=10, save_path = path)
+    histories.append(hist)
+    
+    path = f'{os.getcwd()}/model_states/figures/baptiste_test_accuracies_comparison.png'  
+    names = ['No regularization', 'Dropout', 'BatchNorm', 'Dropout & BatchNorm']
+    show_compare_testing_accuracy(histories, names, key='total', save_path=path, colors=['b-', 'g-', 'r-', 'black'], step_size = 10)
+    print(hist)
+    x = hist[-1]
+    for key in ['total', 'rock', 'paper', 'scissors']:
+        print(x['accuracy_measures'][0][key])
+
+
 if __name__ == "__main__":
     # to see all implemented methods look at my experiment
     #experiment_DataEng_background_removal()
-    # baptiste_test()
-    create_confusion_matrix()
+    #baptiste_test()
+    # create_confusion_matrix()
+    get_accuracies()
