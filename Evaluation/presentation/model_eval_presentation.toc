@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{Research Question}{3}{0}{1}
+\beamer@sectionintoc {2}{Basic Model Evaluation}{6}{0}{2}
+\beamer@sectionintoc {3}{Evaluating On Distorted Images}{14}{0}{3}
+\beamer@sectionintoc {4}{Future Considerations}{21}{0}{4}
