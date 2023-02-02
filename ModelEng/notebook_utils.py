@@ -1,6 +1,6 @@
 # methods for data loading
 
-from tensorflow.keras.preprocessing.image import *
+from keras_preprocessing.image import *
 import numpy as np
 import os
 import glob
@@ -205,7 +205,7 @@ def load_history(load_path):
         return pickle.load(fp)
 
 
-
+"""
 # set file path as working directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -224,7 +224,7 @@ savepath = f'{os.getcwd()}\model_states\obaptiste_val_accuracies_comparison'
 
 show_compare_training_accuracy(histories, names, key='total', save_path=savepath, colors=['b-', 'g-', 'r-', 'black'], step_size = 1)
 
-
+"""
 
 def show_training_and_val_accuracy(history, save_path=None, step_size=1):
     """
