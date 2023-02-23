@@ -43,6 +43,19 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
+%%%% bene
+\usepackage{array}
+\usepackage{multirow}
+
+% for confusion matrices
+\newcommand\MyBox[1]{
+	\fbox{\lower0.75cm
+		\vbox to 1.7cm{\vfil
+			\hbox to 1.7cm{\hfil\parbox{1.4cm}{\centering#1}\hfil}
+			\vfil}%
+	}%
+}
+
 \title{ Your Awesome Title\\ {\large xAI-Proj-M: Master Project Explainable Machine Learning }}
 
 
@@ -56,10 +69,10 @@
 
 
 \author{%
-  Max Mustermann\thanks{Degree: M.Sc. AI, matriculation \#: 12345678} \\
+  Benedikt M. Marsiske\thanks{Degree: M.Sc. CitH, matriculation \#: 2045635} \\
   Otto-Friedrich University of Bamberg\\
   96049 Bamberg, Germany\\
-  \texttt{max.mustermann@stud.uni-bamberg.de}\\
+  \texttt{benedikt-markus.marsiske@stud.uni-bamberg.de}\\
   % examples of more authors
    \And
    Baptiste Bony\thanks{Degree: Engineering Master, matriculation \#: 2117568}\\
@@ -91,7 +104,7 @@
 \def\va{{\bm{a}}}
 
 \begin{abstract}
-  \dots
+ During this project we applied the CRISP-ML methodology to the problem of classifying rock, paper, or scissors from an image that includes exactly one hand. The Deep Learning Life Cycle of CRISP-ML is explored, focusing on Data Engineering, Model Engineering, and Model Evaluation. This report sets out to answer three research questions: (1) Does removing the background during image preprocessing improve classification accuracy? (2) Do dropout layers prevent overfitting and what is the ideal position for these layers in the model? (3) How does the model perform on distorted data and does the use of distorted test data lead to worse model performance compared to the same test data without distortion? The report presents the findings of the experiments, including the implications, limitations, and areas for future improvements. The findings suggest that removing the background leads to a better image classification, while the optimal architecture included dropout layers but no batch normalization. The model that was trained during this project performed poorly on distorted images, but the incorporation of noisy training data was identified as a possible solution for this problem.
 \end{abstract}
 
 
@@ -122,9 +135,9 @@ In order to address the data engineering challenges we identified, we combined d
 
 
 \begin{table}
-\label{tbl:img-origin}
 \caption{Total number of images by source}
 \centering
+\label{tbl:img-origin}
 \begin{tabular}{@{}lllll@{}}
 \toprule
 \multicolumn{1}{c}{Origin} & Rock & Paper & Scissors & Total \\ \midrule
@@ -223,7 +236,7 @@ In conclusion, while our preprocessing pipeline was effective in improving the q
 
 
 
-\section{Model Engineering}
+\section{Model Engineering} \label{sec:ModelEng}
 
 
 The performance metric used in the leaderboard was the accuracy on the test set. Thus, one of our main model engineering challenges was to prevent overfitting for the model to be generalizable to unseen images submitted by each team.
@@ -358,12 +371,178 @@ On the one hand, models incorporating Batch Norm achieve an accuracy level that 
 On the other hand, the model with Dropout achieves slightly better overall accuracy on the test set than the original model.
 
 \section{Model Evaluation}
+\subsection{Basic Model Evaluation} \label{sec:basicEval}
+In this section, we will evaluate the previously presented model based on several criteria. For our evaluation, we first look at the performance of the model on the testset that was provided as part of this project. This dataset consists of 158 images, with 54 instances of paper, 52 instances of rock, and 52 instances of scissors.
+
+The evaluation measures indicate that the model performs reasonably well on the classification task, with an overall classification accuracy of 83.54\%. However, the evaluation also reveals some class imbalances, with the precision, recall, and F1-score varying across the three classes. 
+For example, the model has a high precision for the rock class (0.911), indicating that when the model predicts the rock class, it is usually correct. However, the recall for the rock class is lower (0.788), indicating that the model misses some instances of the rock class.
+
+Similarly, the model has a high recall for the paper class (0.963), indicating that it correctly identifies most instances of the paper class. However, here the precision for the paper class is lower at 0.754, indicating that the model tends to sometimes predict the paper class incorrectly.
+To thoroughly evaluate the performance of the model, we will use precision, recall, F1-score, and accuracy. Precision measures the proportion of true positives among the instances predicted as positive. Recall measures the proportion of true positives among the instances that are actually positive and the F1-score is the harmonic mean of precision and recall. 
+
+To evaluate the accuracy of individual classes we use the One-vs.-rest method, which involves treating the class of interest as the positive class and the remaining classes as the negative class. The model is then evaluated based on its ability to correctly classify instances belonging to the positive class, while ignoring instances belonging to the negative classes. The reported overall classification accuracy of 83.54\%, however, measures the proportion of correctly classified instances among all instances.
+
+To calculate the respective performance metrics, the following equations (\cite{metric_formulas}) were used:
+
+\begin{equation}
+	Precision = \frac{TP}{TP + FP}
+\end{equation}
+
+where TP is the number of true positives and FP is the number of false positives.
+
+\begin{equation}
+	Recall = \frac{TP}{TP + FN}
+\end{equation}
+
+where TP is the number of true positives and FN is the number of false negatives.
+
+\begin{equation}
+	F1 = 2 * \frac{Precision * Recall}{Precision + Recall}
+\end{equation}
+
+where Precision and Recall are as defined above.
+
+\begin{equation}
+	Accuracy = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+
+where TP is the number of true positives, TN is the number of true negatives, FP is the number of false positives, and FN is the number of false negatives.
+\newline
+
+We report the evaluation measures for each individual class in Table \ref{tbl:metrics_model}, which includes precision, recall, F1-score, and accuracy.
+
+\begin{table}[h]
+	\centering
+	\caption{Performance metrics of each individual class}
+	\label{tbl:metrics_model}
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		Class    & Precision & Recall & F1-Score & Accuracy \\ \midrule
+		Rock     & 0.911     & 0.788  & 0.845    & 0.905    \\
+		Paper    & 0.757     & 0.981  & 0.855    & 0.886    \\
+		Scissors & 0.884     & 0.731  & 0.800    & 0.880    \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+
+The overall accuracy of the model is lower than the accuracies for the individual classes, since here only the cases in which the actual and predicted classes match exactly are considered correct. The One-vs.-rest method used for the individual classes does not account for errors that don't involve the current positive class.
+
+To further evaluate, we can look at the confusion matrix of our model's performance on the testset:
+\begin{table}[H]
+	\centering
+	\caption{Confusion matrix of our model on the test data}
+	\renewcommand\arraystretch{1.5}
+	\setlength\tabcolsep{0pt}
+	\begin{tabular}{c >{\bfseries}r @{\hspace{0.4em}}c @{\hspace{0.4em}}c @{\hspace{0.4em}}c @{\hspace{0.4em}}c}
+		\multirow{9}{*}{\rotatebox{90}{\parbox{1.4cm}{\bfseries\centering Actual}}} & 
+		& \multicolumn{3}{c}{\bfseries Prediction} & \\
+		& & \bfseries rock & \bfseries paper & \bfseries scissor & \\
+		& \bfseries rock & \MyBox{41} & \MyBox{7} & \MyBox{4} \\
+		& \bfseries paper & \MyBox{0} & \MyBox{53} & \MyBox{1} \\
+		& \bfseries scissor & \MyBox{4} & \MyBox{10} & \MyBox{38} \\
+	\end{tabular}
+	\label{tab:CM_model_test}
+\end{table}
+
+The confusion matrix (Table \ref{tab:CM_model_test}) shows that the model correctly classified 41 instances of the Rock class, 52 instances of the Paper class, and 38 instances of the Scissors class. The most common error made by the model is to mistake scissors for paper, which occurs in 6.3\% of the cases. This error is understandable because the paper and scissors signs are closely related, and a similar hand gesture can be used to represent both signs. However, this error occurred only in 10 instances, which is a relatively small number of misclassifications. One should note that this result should be interpreted with caution due to the limited size (150 images) of the test set. For a more thorough evaluation a larger and more diverse test set is needed to fully evaluate the model's performance and identify more potential imbalances. \newline
+Despite these limitations, the evaluation suggests that the model is reasonably effective at predicting the correct hand sign. In the next section, we describe an experiment that tests the performance of the model on a noisy test set to further evaluate our model and assess its robustness.
+
+\subsection{Experiment - Evaluating Robustness On Distorted Images}
+\subsubsection{Introduction}
+Robustness is a critical aspect of any machine learning model, particularly for image classification tasks. It can be defined as the ability of a model to maintain its performance under naturally-induced image corruptions or alterations (\cite{robustness}).
+
+Convolutional neural networks (CNNs) are commonly used for image classification tasks, but they are susceptible to corruption (\cite{corruption}). These corruptions can often occur in real-world scenarios due to factors such as a bad internet connection, bad camera quality, or other external factors that cannot be easily controlled. In contrast, humans can easily recognize mildly transformed images caused by noise or blur (\cite{corruption}). Therefore, to build a model that can rival human performance, a robust model is required.
+
+A robust model is not only important for achieving high accuracy, but it also ensures the trustworthiness of the model. There is a general scepticism towards artificial intelligence (AI) from the general public (\cite{AITrust}) and a robustly performing model is an integral part of increasing the trust in AI systems.
+
+To test whether our model is robust and answer our third research question, we conducted an experiment that evaluated the performance of the model on a noisy test set. Specifically, we used two different image modification techniques - Gaussian distortion and random noise - to simulate naturally-induced image corruptions. We compared the performance of our model on our test set with the performance on these noisy datasets. Additionally, we briefly looked into techniques to increase the robustness of our model.
+
+In this experiment, we aimed to determine the impact of image corruptions on the performance of our model and whether it could maintain its performance in real-world scenarios. The results of this experiment will provide valuable insights into the robustness of our model and the potential need for additional optimization to achieve higher performance in real-world settings.
+
+\subsubsection{Method}
+To test the robustness of our rock, paper, scissor image classifier model and answer our research question, we used two different image transformations: Gaussian Noise and Random Distortion, which we implemented using the cv2 Python library.
+
+Gaussian Distortion is a common image transformation technique that applies a Gaussian blur to an image. The amount of blur applied is determined by a standard deviation (SD) parameter, which controls the spread of the normal distribution that is used to generate the blur kernel. We applied a SD of 25 on our preprocessed grayscale images, which resulted in a visible but not overly distorted version of the original image.
+
+Random Noise is a different type of transformation that involves randomly removing pixels from an image. To implement this transformation, we assigned each pixel a set chance to be removed. We chose a value of 25\%, which meant that 25\% of the pixels of each image got randomly removed and replaced by a black pixel. 
+
+By using these two transformations on our preprocessed test dataset, we created two additional datasets that included the same images as the original test set, but with the added distortions. This way we can compare the performance of our model on the undistorted dataset with the performance on the two distorted datasets.
+
+To further test whether we could improve the robustness of our model, we also trained the model with noisy data. Specifically, we used the same architecture as described in section \ref{sec:ModelEng} and used the same training set as before but this time it consisted of 70\% non-distorted images and 30\% distorted images with the Random Noise Transformation. This new model allowed us to briefly evaluate the effect of incorporating noisy images to our training data.
+
+Due to issues during the training process and time restraints of the project we stopped the training and used the model produced after only 20 training epochs. This model was the best performing one out of the models trained on noisy data and still provided insight into the effect of using such techniques.
+
+\subsubsection{Results}
+Comparing the results presented in section \ref{sec:basicEval} of the model’s performance on the undistorted dataset with the performance on the distorted datasets, we notice a drastic decrease in the performance.
+
+When tested on the dataset with random distortion, the model's accuracy decreased to 0.43. The most noticeable decrease in performance was observed in the scissors class, where the model had difficulty identifying any images as scissors (precision: 0.417, recall: 0.096, F1-score: 0.156). A more detailed overview of the classification distribution can be found in Table \ref{tab:CM_model_randDis}.
+
+When tested on the dataset with Gaussian distortion, the model's total accuracy was 0.49. Here we could observe that the model strongly preferred the paper class and classified most of the images as paper, leading to a recall of 0.907 with a precision of only 0.412. The confusion matrix for this testset can be found in Table \ref{tab:CM_model_GaussDis}.
+
+The evaluation of the model trained on noisy data showed that it performed worse on the undistorted testset (total accuracy: 0.589). However, the model was robust against both distorted datasets, with the same accuracy or higher accuracy than on the undistorted testset.
+
+All the total accuracies are presented in Table \ref{tbl:accuracies_models} below. The exact performance metrics of our standard model on the undistorted testset are shown in Table \ref{tbl:metrics_model} while the remaining metrics on the different datasets can be found in the appendix.
+
+\begin{table}[H]
+	\centering
+	\caption{Accuracy of our models on different test data}
+	\label{tbl:accuracies_models}
+	\begin{tabular}{@{}lcc@{}}
+		\toprule
+		Data                & \multicolumn{1}{l}{Standard Model} & \multicolumn{1}{l}{Model Trained On Noisy Data} \\ \midrule
+		Undistorted Testset & 0.835                              & 0.589                                           \\
+		Random Distortion   & 0.430                              & 0.652                                           \\
+		Gaussian Noise      & 0.494                              & 0.595                                           \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[h]
+	\centering
+	\caption{Confusion matrix of our model on the randomly distorted testset}
+	\renewcommand\arraystretch{1.5}
+	\setlength\tabcolsep{0pt}
+	\begin{tabular}{c >{\bfseries}r @{\hspace{0.4em}}c @{\hspace{0.4em}}c @{\hspace{0.4em}}c @{\hspace{0.4em}}c}
+		\multirow{9}{*}{\rotatebox{90}{\parbox{1.4cm}{\bfseries\centering Actual}}} & 
+		& \multicolumn{3}{c}{\bfseries Prediction} & \\
+		& & \bfseries rock & \bfseries paper & \bfseries scissor & \\
+		& \bfseries rock & \MyBox{34} & \MyBox{15} & \MyBox{3} \\
+		& \bfseries paper & \MyBox{21} & \MyBox{29} & \MyBox{4} \\
+		& \bfseries scissor & \MyBox{23} & \MyBox{24} & \MyBox{5} \\
+	\end{tabular}
+	\label{tab:CM_model_randDis}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Confusion matrix of our model on the testset with Gaussian Noise}
+	\renewcommand\arraystretch{1.5}
+	\setlength\tabcolsep{0pt}
+	\begin{tabular}{c >{\bfseries}r @{\hspace{0.4em}}c @{\hspace{0.4em}}c @{\hspace{0.4em}}c @{\hspace{0.4em}}c}
+		\multirow{9}{*}{\rotatebox{90}{\parbox{1.4cm}{\bfseries\centering Actual}}} & 
+		& \multicolumn{3}{c}{\bfseries Prediction} & \\
+		& & \bfseries rock & \bfseries paper & \bfseries scissor & \\
+		& \bfseries rock & \MyBox{18} & \MyBox{31} & \MyBox{3} \\
+		& \bfseries paper & \MyBox{5} & \MyBox{49} & \MyBox{0} \\
+		& \bfseries scissor & \MyBox{2} & \MyBox{39} & \MyBox{11} \\
+	\end{tabular}
+	\label{tab:CM_model_GaussDis}
+\end{table}
+
+
+\subsubsection{Discussion}
+The results of our experiment showed that the model's performance varied considerably across different datasets, highlighting the importance of robustness to noise and other types of distortion.
+
+We observed that the model trained on undistorted data did not perform well on noisy data, indicating that the model is not robust against noisy data. However, we found that training the model on noisy data improved its robustness to noise. This suggests that training with more diverse data, including noisy data, can help improve the model's robustness.
+
+While the model trained on distorted data was more robust against both types of distortion, we have to note that it did not perform well on any of the test sets. When incorporating noisy data in the training, there are many factors to consider that are beyond the scope of this project. Our attempt at training a model on noisy data was more of a proof of concept, showing that it is possible to increase the model's robustness even though the overall performance was poor. Further investigation is necessary to determine the optimal approach for incorporating noisy data in the training process to achieve both robustness and high performance.
+
+Although we only used two different types of distortion in this study, our results suggest that our model's robustness against one type of distortion can transfer to other types of distortion. Additionally, we acknowledge that our distortion may not be entirely natural, but we attempted to produce noise that is close to naturally occurring noise.
 
 
 \section{Final Conclusion}
 
 
-
+\newpage
 \section*{References}
 
 
@@ -415,10 +594,10 @@ Bamberg, \today
 
 \section{Appendix}
 
-\begin{table}
-\label{tbl:img-hands_percentage}
+\begin{table}[H]
 \caption{Percentage of detected hands in images}
 \centering
+\label{tbl:img-hands_percentage}
 \begin{tabular}{@{}lllll@{}}
 \toprule
 \multicolumn{1}{c}{Origin} & Rock   & Paper  & Scissors & Total  \\ \midrule
@@ -430,9 +609,7 @@ Total                      & 92.8\% & 98.0\% & 95.6\%   & 95.5\% \\ \bottomrule
 \end{tabular}
 \end{table}
 
-
-
-\begin{figure}
+\begin{figure}[H]
     \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__training_acc_total.png}\hfill
     \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__training_acc_rock.png}\hfill
     \\[\smallskipamount]
@@ -441,7 +618,8 @@ Total                      & 92.8\% & 98.0\% & 95.6\%   & 95.5\% \\ \bottomrule
     \caption{Model performance on training data}
     \label{fig:exp-de-acc-train}
 \end{figure}
-\begin{figure}
+
+\begin{figure}[H]
     \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__val_acc_total.png}\hfill
     \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__val_acc_rock.png}\hfill
     \\[\smallskipamount]
@@ -451,8 +629,72 @@ Total                      & 92.8\% & 98.0\% & 95.6\%   & 95.5\% \\ \bottomrule
     \label{fig:exp-de-acc-val}
 \end{figure}
 
+\begin{table}[H]
+	\centering
+	\caption{Performance metrics for our standard model on the randomly distorted testset}
+	\label{tbl:metrics_model_rm}
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		Class    & Precision & Recall & F1-Score & Accuracy \\ \midrule
+		Rock     & 0.436     & 0.654  & 0.523    & 0.608    \\
+		Paper    & 0.426     & 0.537  & 0.475    & 0.595    \\
+		Scissors & 0.417     & 0.096  & 0.156    & 0.658    \\ \bottomrule
+	\end{tabular}
+\end{table}
 
-\begin{table}
+\begin{table}[H]
+	\centering
+	\caption{Performance metrics for our standard model on the testset distorted with Gaussian noise}
+	\label{tbl:metrics_model_gauss}
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		Class    & Precision & Recall & F1-Score & Accuracy \\ \midrule
+		Rock     & 0.720     & 0.346  & 0.468    & 0.741    \\
+		Paper    & 0.412     & 0.907  & 0.566    & 0.525    \\
+		Scissors & 0.786     & 0.212  & 0.333    & 0.722    \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Performance metrics for the model trained on 30\% noisy data on the undistorted testset}
+	\label{tbl:noisy_model_noDis}
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		Class    & Precision & Recall & F1-Score & Accuracy \\ \midrule
+		Rock     & 0.542     & 0.865  & 0.667    & 0.715    \\
+		Paper    & 0.556     & 0.370  & 0.444    & 0.684    \\
+		Scissors & 0.718     & 0.538  & 0.615    & 0.778    \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Performance metrics for the model trained on 30\% noisy data on the randomly distorted testset}
+	\label{tbl:noisy_model_rm}
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		Class    & Precision & Recall & F1-Score & Accuracy \\ \midrule
+		Rock     & 0.605     & 0.885  & 0.719    & 0.772    \\
+		Paper    & 0.641     & 0.463  & 0.538    & 0.728    \\
+		Scissors & 0.744     & 0.615  & 0.674    & 0.804    \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Performance metrics for the model trained on 30\% noisy data on the testset distorted with Gaussian noise}
+	\label{tbl:noisy_model_Gauss}
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		Class    & Precision & Recall & F1-Score & Accuracy \\ \midrule
+		Rock     & 0.592     & 0.808  & 0.683    & 0.753    \\
+		Paper    & 0.509     & 0.519  & 0.514    & 0.665    \\
+		Scissors & 0.750     & 0.462  & 0.571    & 0.772    \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
 \caption{Who wrote which part}
 \label{tbl:who}
 \centering
