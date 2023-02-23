@@ -39,6 +39,9 @@
 \usepackage{algorithm} 
 \usepackage{algpseudocode} 
 \usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \title{ Your Awesome Title\\ {\large xAI-Proj-M: Master Project Explainable Machine Learning }}
 
@@ -59,10 +62,10 @@
   \texttt{max.mustermann@stud.uni-bamberg.de}\\
   % examples of more authors
    \And
-   Erika Musterfrau\thanks{Degree: M.Sc. AI, matriculation \#: 12345678}\\
+   Baptiste Bony\thanks{Degree: Engineering Master, matriculation \#: 2117568}\\
    Otto-Friedrich University of Bamberg\\
    96049 Bamberg, Germany\\
-   \texttt{erika.musterfrau@stud.uni-bamberg.de} \\
+   \texttt{baptiste-patrice-francis.bony@stud.uni-bamberg.de} \\
    \And
    Jonas R. Amling\thanks{Degree: M.Sc. AI, matriculation \#: 1867301}\\
    Otto-Friedrich University of Bamberg\\
@@ -170,9 +173,7 @@ For our data engineering problem, we have opted to utilize MediaPipe Hands as th
 
 In the final step of our model data engineering, we decided to incorporate data augmentation techniques to improve the generalization of our model. We used simple forms of data augmentation, including random rotations, horizontal and vertical flips, and random affine transformations with shearing and scaling. We implemented these transformations using the standard transformation function provided by PyTorch Data Loader. Our data augmentation function is composed of various transformations, including ToTensor, RandomAffine (shear, scale), RandomRotation, RandomHorizontalFlip, and RandomVerticalFlip. This data augmentation will enable our model to be more robust to variations in the data and increase its performance during testing.
 
-\section{Experiments}
-
-\subsection{Data Engineering Experiment}
+\subsection{Experiment}
 
 Based on the research question, we want to investigate if removing the background (by cropping the images based on the bounding box generated from MediaPipe Hands outcome) during the image preprocessing phase benefits the image classification task. To test this, we will train the same model with and without preprocessed data and then test the performance on a test dataset, both preprocessed and not preprocessed. We hypothesize that the model trained on preprocessed data will perform better than the model trained on non-preprocessed data, as removing the background can reduce noise and improve the model's ability to learn the hand features. Our null hypothesis is that regardless of the preprocessing used, the blackbox model should perform equally on the validation and test dataset in terms of accuracy.
 
@@ -208,7 +209,7 @@ The results of the experiment are as follows and presented in Figures \ref{fig:e
 \end{itemize}
 Based on these results, it can be assumed that reducing the complexity of the dataset by removing the background (i.e. unimportant parts of the image) leads to better model performance.
 
-\section{Discussion}
+\subsection{Discussion}
 
 The results of our preprocessing pipeline indicate that it was effective in enhancing the quality of the input images for our hand gesture recognition model. However, since we did not apply any statistical tests to our findings, the results only suggest a tendency towards better performance rather than scientifically correct findings.
 
@@ -216,9 +217,145 @@ One issue that arose during the preprocessing stage was the possibility that spe
 
 Furthermore, the evaluation of the model on validation and test data revealed that the training data did not sufficiently model the testing and validation data. This might be due to the fact that the training data consisted of CGI and hands with a green background, which is not a common occurrence in real-life scenarios. As a result, it might have been more beneficial to generate much more custom data that better represented the real-life scenarios to improve the performance of the model.
 
-\section{Conclusion}
+\subsection{Conclusion}
 
 In conclusion, while our preprocessing pipeline was effective in improving the quality of the input images, the results should be interpreted with caution due to the lack of statistical testing. Additionally, the limitation of the preprocessing techniques and the need for more representative training data suggest that another approach should be considered in order to improve the overall performance of the hand gesture recognition model.
+
+
+
+\section{Model Engineering}
+
+
+The performance metric used in the leaderboard was the accuracy on the test set. Thus, one of our main model engineering challenges was to prevent overfitting for the model to be generalizable to unseen images submitted by each team.
+The problem of overfitting in machine learning is a common one, especially in deep learning models such as convolutional neural networks. To address this issue, we tried two regularization techniques, namely Dropout and Batch Normalization.
+This section aims to investigate the effectiveness of Dropout and Batch Norm in preventing overfitting in our image classification task. 
+
+
+Our first model was a simple Convolutional Neural Network (CNN). We obtained insufficient results in terms of accuracy, especially on the scissors class. Our hypothesis is that our model was unable to recognize scissors because of the image input size, as we were using 32 x 32 pixels images. Indeed, more pixels are needed to recognize the outline of the fingers making a scissors shape as compared to rock or paper. Therefore, we decided to make input images 64 x 64 pixels instead. We also looked at the literature to improve our model and took inspiration from VGG16 (\cite{VGG16}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/baptiste/model_dropout_false_batchnorm_false.png}
+    \caption{Visualization of our model}
+\end{figure}
+
+
+Overfitting is a common problem in machine learning where a model is trained to fit the training data too closely, to the point that it becomes overly specialized and loses its ability to generalize to new, unseen data. This undesirable behavior happens when a model is too complex or has too many parameters relative to the size of the training data. As a result, the model may perform well on the training data, but its performance on the test data is significantly worse. Therefore, overfitting can be diagnosed by splitting the dataset into train, validation and tests sets, and comparing loss and accuracy curves.
+
+
+Dropout is a regularization technique used in machine learning to prevent overfitting. It works by randomly dropping out a certain percentage of neurons in a neural network during training, which helps to reduce co-adaptation between neurons and makes the network more robust. This means that the network is forced to learn more generalizable features and is less likely to overfit to the training data. Dropout can be applied to any layer in a neural network, including input, hidden, and output layers, and is typically implemented by setting a dropout rate that determines the probability of dropping out each neuron. 
+
+
+Batch Normalization is a technique used to improve training stability and speed and has also been shown to improve the generalization performance of neural networks. It works by normalizing the input data to each layer of the network so that it has zero mean and unit variance. This helps to alleviate the problem of covariate shift, which occurs when the distribution of input features changes as the network trains. By normalizing the input data, batch normalization helps to ensure that the network can learn more effectively and with fewer training iterations. Batch Norm can be applied to any layer in a neural network, including input, hidden, and output layers, and is typically implemented as a layer in the network architecture.
+
+
+\subsection{Experiment}
+
+To investigate the impact of Dropout and Batch Norm on overfitting, we trained the network during 100 epochs in four different configurations: 
+\begin{enumerate}
+    \item Without any regularization
+    \item With Dropout
+    \item With Batch Norm
+    \item With both Dropout and Batch Norm
+\end{enumerate}
+We recorded the classification accuracy and loss on both the training and validation datasets, as well as the accuracy on the test set. The dropout rate was 0.5 and the batch size was 64.
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_False__BatchNorm_False.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_False__BatchNorm_False.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance without any regularization}
+\label{fig:test}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_True__BatchNorm_False.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_True__BatchNorm_False.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance with Dropout}
+\label{fig:test}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_False__BatchNorm_True.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_False__BatchNorm_True.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance with Batch Norm}
+\label{fig:test}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_True__BatchNorm_True.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_True__BatchNorm_True.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance with both Dropout and Batch Norm}
+\label{fig:test}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/baptiste/baptiste_val_accuracies_comparison.png}
+    \caption{Comparison between the four accuracies on validation set}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/baptiste/baptiste_test_accuracies_comparison.png}
+    \caption{Comparison between the four accuracies on test set}
+\end{figure}
+
+
+All accuracies on the validation are similar, whatever the combination of regularization technique is.
+
+However, accuracies on the test set are different from each other.
+
+On the one hand, models incorporating Batch Norm achieve an accuracy level that is notably low, even failing to surpass random chance. This trend shows that Batch Normalization hinders generalization ability of the model in our case. We came up with several hypothesis to explain this unexpected behavior. During inference, Batch Norm resorts to parameters that were learnt during training based on the statistics of the training data. Therefore, if the discrepancy is substantial between the data distribution of the training set and the test set, then the Batch Normalization layer may not work as well during inference, leading to poor performance. In conclusion, the out-of-domain data contained in the test set explains why Batch Norm worsens model robustness, according to the test accuracy metric.
+
+On the other hand, the model with Dropout achieves slightly better overall accuracy on the test set than the original model.
 
 \newpage
 
