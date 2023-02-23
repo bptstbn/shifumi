@@ -1,0 +1,330 @@
+\documentclass[a4paper]{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2022
+
+
+% ready for submission
+%\usepackage{ofu_xai_2022}
+
+\input{math_commands.tex}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{ofu_xai_2022}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+\usepackage[final, nonatbib]{ofu_xai_2022}
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{ofu_xai_2022}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+\usepackage[round]{natbib}
+%%%%
+
+%%%%% jonas
+\usepackage{algorithm} 
+\usepackage{algpseudocode} 
+\usepackage{graphicx}
+
+\title{ Your Awesome Title\\ {\large xAI-Proj-M: Master Project Explainable Machine Learning }}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{%
+  Max Mustermann\thanks{Degree: M.Sc. AI, matriculation \#: 12345678} \\
+  Otto-Friedrich University of Bamberg\\
+  96049 Bamberg, Germany\\
+  \texttt{max.mustermann@stud.uni-bamberg.de}\\
+  % examples of more authors
+   \And
+   Erika Musterfrau\thanks{Degree: M.Sc. AI, matriculation \#: 12345678}\\
+   Otto-Friedrich University of Bamberg\\
+   96049 Bamberg, Germany\\
+   \texttt{erika.musterfrau@stud.uni-bamberg.de} \\
+   \And
+   Jonas R. Amling\thanks{Degree: M.Sc. AI, matriculation \#: 1867301}\\
+   Otto-Friedrich University of Bamberg\\
+   96049 Bamberg, Germany\\
+   \texttt{jonas-reinhold.amling@stud.uni-bamberg.de} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+
+\begin{document}
+
+
+\maketitle
+\def\va{{\bm{a}}}
+
+\begin{abstract}
+  \dots
+\end{abstract}
+
+
+\section{Introduction}
+
+The goal of this research project is to apply the CRISP-ML (Cross-Industry Standard Process for the development of Machine Learning applications with Quality assurance) methodology \citep{crisp} to the problem of classifying rock, paper, or scissors from an image that includes exactly one hand. Specifically, we will focus on the CRISP-ML: Deep Learning Life Cycle and explore the three main steps in the process: Data Engineering, Model Engineering, and Model Evaluation. An short overview of the complete CRISP-ML cycle is presented in Figure \ref{fig:crisp}.
+
+Data Engineering is the process of understanding and preparing the data. This involves selecting the data to use, determining the amount of data needed, cleaning the data, and augmenting the data if necessary. The first research question for this project is whether removing the background during the image preprocessing phase benefits the image classification task at hand. This question aims to understand the impact of background removal on the accuracy of the model.
+
+Model Engineering involves building a model that meets the desired requirements, such as the model architecture, training strategies, handling overfitting, and hyperparameter tuning. Our second research question is whether dropout layers prevent overfitting and what the ideal position is for these layers in the model. This question aims to optimize the model architecture and avoid overfitting.
+
+Finally, Model Evaluation involves validating the model performance on a test set, evaluating its robustness and generalization, and determining the correct measures to use. Our third research question is how the model performs on distorted data and whether the use of distorted test data leads to worse model performance compared to the same test data without distortion. This question explores the robustness and generalization capabilities of the model.
+
+In this report, we will present our findings for each research question, explain the rationale behind each question, and set up a simple experiment to test each research question. We will discuss the implications of the findings, provide limitations of our approach, and suggest areas for future improvements. An overview of which parts of the report was written by which author is presented in Table \ref{tbl:who}.
+
+\begin{figure}
+       \centering
+      \includegraphics[width=.5\textwidth]{img/crisp.png}
+       \caption{The CRISP-ML: Deep Learning Life Cycle as presented in the introductory presentation by Ines Rieger.}
+       \label{fig:crisp}
+   \end{figure} 
+
+\section{Data Engineering}
+During ourur data engineering process we wanted to deal with problems that arise when combining data from multiple sources into a single dataset for model training. Specifically, we identified three key challenges in working with different datasets: combining images from different resolutions and formats, accounting for variations in hand position within each dataset (e.g., hands always positioned in the middle versus positioned elsewhere in the image), and dealing with different contextual backgrounds for the hands (e.g., single-color backgrounds versus real-life image backgrounds). We assumed that reducing the complexity of the datasets was a crucial factor in generating a well-performing model. Thus, our research question was formulated as follows: Does removing the background during the image preprocessing phase benefit the image classification task at hand? This research question will guide our investigation throughout the data engeneering part of the project.
+
+
+In order to address the data engineering challenges we identified, we combined data from multiple datasets into a single dataset for model training. The training data was created by combining data from several sources, including self-produced images, computer-generated images, and existing datasets from Kaggle. The existing datasets from Kaggle included a dataset of hands with bodies and a dataset of hands from the top. \footnote{\url{https://www.kaggle.com/datasets/drgfreeman/rockpaperscissors}} \footnote{\url{https://www.kaggle.com/datasets/glushko/rock-paper-scissors-dataset}} The computer-generated images were obtained from the TensorFlow datasets catalog. \footnote{\url{https://www.tensorflow.org/datasets/catalog/rock_paper_scissors}} We chose to combine both computer-generated images and real-life images to increase the variety of the training data. Since the testing data was unknown during the data engineering phase of the project, we created a separate validation dataset that was provided by the project, as well as a testing dataset that was also provided by the project. We will refer to these datasets in future discussions as follows: the self-produced images as "custom," the computer-generated images as "cgi," the Kaggle dataset of hands with bodies as "webcam," and the Kaggle dataset of hands from the top as "hands." An overview of the total number of images is presented in Table \ref{tbl:img-origin} and the distributions are shown in Figure \ref{fig:all_data}.
+
+
+\begin{table}
+\label{tbl:img-origin}
+\caption{Total number of images by source}
+\centering
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\multicolumn{1}{c}{Origin} & Rock & Paper & Scissors & Total \\ \midrule
+custom                     & 210  & 205   & 210      & 625   \\
+cgi                        & 840  & 840   & 840      & 2520  \\
+hands                      & 726  & 712   & 750      & 2188  \\
+webcam                     & 752  & 733   & 760      & 2245  \\
+Total                      & 2528 & 2490  & 2560     & 7578  \\ \bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}
+       \centering
+      \includegraphics[width=.75\textwidth]{img/ds_analysis/train_ds.png}
+       \caption{Individual dataset distribution showing the number of images in each dataset}
+       \label{fig:all_data}
+   \end{figure} 
+
+
+To streamline our dataset and remove extraneous background images, we set out to identify Python libraries capable of detecting hands in an image and eliminating the background. After thorough research, we narrowed our focus to three potential options: YOLO-Hand-Detection, rembg, and MediaPipe Hands. Although YOLO-Hand-Detection was able to detect hand positions in real-life images, it was not easily set up and ran the risk of technical difficulties.\footnote{https://github.com/cansik/yolo-hand-detection} Rembg, on the other hand, was readily available and easy to set up, but had shortcomings that resulted in erroneous background removal.\footnote{https://pypi.org/project/rembg/} The purpose of using rembg was to extract the hand from the background and create a uniform image background. Ultimately, we determined that MediaPipe Hands was the most suitable solution, as it can generate a 3D hand model from a 2D image and proved to be highly effective for our purposes.\footnote{https://google.github.io/mediapipe/solutions/hands.html}
+
+MediaPipe Hands is part of MediaPipe, a library developed by Google, which is a versatile tool that provides various functionalities, such as face detection, object recognition, hand detection, and selfie segmentation. We specifically utilized MediaPipe Hands due to its ability to accurately perceive the shape and motion of hands, making it ideal for applications like sign language understanding and hand gesture control. The library is capable of high-fidelity hand and finger tracking, using machine learning to infer 21 3D landmarks of a hand from a single frame \cite{mediapipe}, which allows it to predict a hand skeleton. This is achieved using two models simultaneously: a palm detector that operates on a full input image to locate palms via an oriented hand bounding box, and a hand landmark model that operates on the cropped hand bounding box provided by the palm detector and returns high-fidelity landmarks. Table \ref{tbl:img-hands_percentage} demonstrates the performance of MediaPipe Hands with a hand confidence threshold of 0.1. Based on the results, we determined the performance to be satisfactory for our intended use.
+
+\begin{algorithm}
+	\caption{Find the Bounding Box from the MediaPipe Hands Landmarks} 
+	\label{alg:bounding-box}
+	\begin{algorithmic}[1]
+	\State $xHandCords$ $\gets$ $\emptyset$
+	\State $yHandCords$ $\gets$ $\emptyset$
+		\For {$landmark$ in $handLandmarks$}
+			\State $xHandCords$ $\gets$ $xHandCords$ $\cup$ $landmark$.x
+			\State $yHandCords$ $\gets$ $yHandCords$ $\cup$ $landmark$.y
+		\EndFor
+		\State $minX$ = min($xHandCords$)
+		\State $minY$ = min($yHandCords$)
+		\State $maxX$ = max($xHandCords$)
+		\State $maxY$ = max($yHandCords$)
+		\State \Return $\{$ $minX$,$minY$,$maxX$,$maxY$ $\}$
+	\end{algorithmic} 
+\end{algorithm}
+
+
+For our data engineering problem, we have opted to utilize MediaPipe Hands as the foundation for our preprocessor. This preprocessor is tasked with finding the bounding box around a hand in an image and cropping the image accordingly. Our parameters for image processing include specifying the desired dimensions of the preprocessed image, cropping the image based on the hand position within the image using MediaPipe Hands, removing the background with the rembg library, and converting the images to one-channel greyscale images. The preprocessing steps consist of reading the image using cv2, cropping the image based on the bounding box found with MediaPipe Hands, resizing the image, adding padding if necessary, and converting the image to greyscale using cv2. The method for determining the bounding box to crop the image can be found in Algorithm \ref{alg:bounding-box}. After conducting tests, we selected (300,300) as the desired dimensions which are then scaled down to (64,64) for our final model. Our preprocessor crops images using a hand detection confidence of 0.1, does not remove the background using rembg due to poor performance, and converts the images to greyscale to facilitate one-dimensional model input.
+
+
+In the final step of our model data engineering, we decided to incorporate data augmentation techniques to improve the generalization of our model. We used simple forms of data augmentation, including random rotations, horizontal and vertical flips, and random affine transformations with shearing and scaling. We implemented these transformations using the standard transformation function provided by PyTorch Data Loader. Our data augmentation function is composed of various transformations, including ToTensor, RandomAffine (shear, scale), RandomRotation, RandomHorizontalFlip, and RandomVerticalFlip. This data augmentation will enable our model to be more robust to variations in the data and increase its performance during testing.
+
+\section{Experiments}
+
+\subsection{Data Engineering Experiment}
+
+Based on the research question, we want to investigate if removing the background (by cropping the images based on the bounding box generated from MediaPipe Hands outcome) during the image preprocessing phase benefits the image classification task. To test this, we will train the same model with and without preprocessed data and then test the performance on a test dataset, both preprocessed and not preprocessed. We hypothesize that the model trained on preprocessed data will perform better than the model trained on non-preprocessed data, as removing the background can reduce noise and improve the model's ability to learn the hand features. Our null hypothesis is that regardless of the preprocessing used, the blackbox model should perform equally on the validation and test dataset in terms of accuracy.
+
+
+
+In order to test our research question, we will conduct an experiment where we train a deep learning model on both preprocessed and non-preprocessed data, and then compare their performance on a test dataset. We will use the same preprocessor parameters as before, but will crop images based on MediaPipe Hands with an interval of 0.001 for the validation and training data to obtain the best hand detection. The model parameters will be set with a dropout probability of 0.5, no batch normalization, 100 epochs of training, and a batch size of 64. We will use Adam optimizer with a learning rate of 0.001 and CrossEntropy as the criterion. To compare the models' performances, we will calculate the accuracy of the models on the train, validation, and test data after every 10 epochs of training. We will then compare the differences in accuracy between the two models. The experimental setup is illustrated in Figure \ref{fig:exp-de-setup}.
+
+
+\begin{figure}
+    \includegraphics[width=.95\textwidth]{img/experiment/Experiment_Setup.png}
+    \caption{Data Engineering experimental setup}
+    \label{fig:exp-de-setup}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__test_acc_total.png}\hfill
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__test_acc_rock.png}\hfill
+    \\[\smallskipamount]
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__test_acc_paper.png}\hfill
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__test_acc_scissors.png}\hfill
+    \caption{Model performance on test data}
+    \label{fig:exp-de-acc-test}
+\end{figure}
+
+The results of the experiment are as follows and presented in Figures \ref{fig:exp-de-acc-train}, \ref{fig:exp-de-acc-val} and \ref{fig:exp-de-acc-test}:
+\begin{itemize}
+	\item Training Data: The model trained on cropped images outperformed the model trained on non-cropped images in terms of accuracy at less training steps. After 60 epochs, the total and category-wise performances of both models were comparable.
+
+    \item Validation Data: The model trained on cropped images consistently outperformed the model trained on non-cropped images in each test model iteration. The total performance of the model trained on cropped images was always better, except for the "rock" category where the model trained on non-cropped images performed slightly better after 100 epochs of training.
+
+    \item Testing Data: The model trained on cropped images consistently outperformed the model trained on non-cropped images in each test model iteration. The model trained on cropped images had much better performance at fewer training steps and remained better over all 100 training epochs. The overall performance of the model trained on cropped images was better.
+
+\end{itemize}
+Based on these results, it can be assumed that reducing the complexity of the dataset by removing the background (i.e. unimportant parts of the image) leads to better model performance.
+
+\section{Discussion}
+
+The results of our preprocessing pipeline indicate that it was effective in enhancing the quality of the input images for our hand gesture recognition model. However, since we did not apply any statistical tests to our findings, the results only suggest a tendency towards better performance rather than scientifically correct findings.
+
+One issue that arose during the preprocessing stage was the possibility that specific preprocessing techniques could limit the overall performance of the model to the performance of the preprocessing itself. This suggests that more sophisticated preprocessing techniques might be required to improve the performance of the model beyond a certain point. On the other hand, even no preprocessing might be a valid approach but therefore the training data should be increased significantly.
+
+Furthermore, the evaluation of the model on validation and test data revealed that the training data did not sufficiently model the testing and validation data. This might be due to the fact that the training data consisted of CGI and hands with a green background, which is not a common occurrence in real-life scenarios. As a result, it might have been more beneficial to generate much more custom data that better represented the real-life scenarios to improve the performance of the model.
+
+\section{Conclusion}
+
+In conclusion, while our preprocessing pipeline was effective in improving the quality of the input images, the results should be interpreted with caution due to the lack of statistical testing. Additionally, the limitation of the preprocessing techniques and the need for more representative training data suggest that another approach should be considered in order to improve the overall performance of the hand gesture recognition model.
+
+\newpage
+
+\section*{References}
+
+
+\bibliography{bibliography}
+\bibliographystyle{abbrvnat}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Declaration of Authorship
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Declaration of Authorship}
+All final papers have to include the following ‘Declaration of Authorship’:
+
+{\parindent 0cm
+%%%%%%%%%%%%%%%%%%%%%%%%%%German%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Declaration of Authorship}
+Ich erkläre hiermit gemäß § 9 Abs. 12 APO, dass ich die vorstehende Projektarbeit selbstständig verfasst und keine anderen als die angegebenen Quellen und Hilfsmittel benutzt habe. Des Weiteren erkläre ich, dass die digitale Fassung der gedruckten Ausfertigung der Projektarbeit ausnahmslos in Inhalt und Wortlaut entspricht und zur Kenntnis genommen wurde, dass diese digitale Fassung einer durch Software unterstützten, anonymisierten Prüfung auf Plagiate unterzogen werden kann.\\
+\vspace{2\baselineskip}
+  
+Bamberg, \today
+
+\rule[0.5em]{14em}{0.5pt} \hspace{0.25\linewidth}\rule[0.5em]{14em}{0.5pt}
+\vspace{1em}
+\hspace{4em} (Place, Date) \hspace{0.51\linewidth} (Signature)
+
+Bamberg, \today
+
+\rule[0.5em]{14em}{0.5pt} \hspace{0.25\linewidth}\rule[0.5em]{14em}{0.5pt}
+\vspace{1em}
+\hspace{4em} (Place, Date) \hspace{0.51\linewidth} (Signature)
+
+Bamberg, \today
+
+\rule[0.5em]{14em}{0.5pt} \hspace{0.25\linewidth}\rule[0.5em]{14em}{0.5pt}
+\vspace{1em}
+\hspace{4em} (Place, Date) \hspace{0.51\linewidth} (Signature)
+}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\appendix
+
+\section{Appendix}
+
+\begin{table}
+\label{tbl:img-hands_percentage}
+\caption{Percentage of detected hands in images}
+\centering
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\multicolumn{1}{c}{Origin} & Rock   & Paper  & Scissors & Total  \\ \midrule
+custom                     & 95.2\% & 90.7\% & 96.2\%   & 94.1\% \\
+cgi                        & 89.0\% & 100\%  & 100\%    & 96.3\% \\
+hands                      & 95.9\% & 99.6\% & 94.5\%   & 96.6\% \\
+webcam                     & 93,5\% & 96.2\% & 91.8\%   & 93.8\% \\
+Total                      & 92.8\% & 98.0\% & 95.6\%   & 95.5\% \\ \bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\begin{figure}
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__training_acc_total.png}\hfill
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__training_acc_rock.png}\hfill
+    \\[\smallskipamount]
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__training_acc_paper.png}\hfill
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__training_acc_scissors.png}\hfill
+    \caption{Model performance on training data}
+    \label{fig:exp-de-acc-train}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__val_acc_total.png}\hfill
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__val_acc_rock.png}\hfill
+    \\[\smallskipamount]
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__val_acc_paper.png}\hfill
+    \includegraphics[width=.49\textwidth]{img/experiment/model_comp_10steps__val_acc_scissors.png}\hfill
+    \caption{Model performance on validation data}
+    \label{fig:exp-de-acc-val}
+\end{figure}
+
+
+\begin{table}
+\caption{Who wrote which part}
+\label{tbl:who}
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\multicolumn{1}{c}{Part} & Baptiste   & Benedikt  & Jonas  \\ \midrule
+Abstract                     			&   &  &  \\
+Introduction                 			&   &  & $\surd$ \\
+Data Engineering             			&   &  & $\surd$ \\
+Data Engineering  Experiment          &   &  & $\surd$ \\
+Discussion            					&   &  & $\surd$ \\
+Conclusion           					&   &  & $\surd$ \\
+ \bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
