@@ -227,13 +227,13 @@ class RPSDataset(Dataset):
         self.transforms = transforms
 
     def __len__(self):
-         """
+        """
         Returns the length of the dataset.
         """
         return len(self.x)
 
     def __getitem__(self, ix):
-         """
+        """
         Returns the item at the given index.
 
         Args:
