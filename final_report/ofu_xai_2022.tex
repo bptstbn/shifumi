@@ -56,7 +56,7 @@
 	}%
 }
 
-\title{ Your Awesome Title\\ {\large xAI-Proj-M: Master Project Explainable Machine Learning }}
+\title{ Rock-Paper-Scissors Image Classification\\ {\large xAI-Proj-M: Master Project Explainable Machine Learning }}
 
 
 % The \author macro works with any number of authors. There are two commands
@@ -264,111 +264,52 @@ Batch Normalization is a technique used to improve training stability and speed 
 
 \subsection{Experiment}
 
-To investigate the impact of Dropout and Batch Norm on overfitting, we trained the network during 100 epochs in four different configurations: 
-\begin{enumerate}
-    \item Without any regularization
-    \item With Dropout
-    \item With Batch Norm
-    \item With both Dropout and Batch Norm
-\end{enumerate}
-We recorded the classification accuracy and loss on both the training and validation datasets, as well as the accuracy on the test set. The dropout rate was 0.5 and the batch size was 64.
+\subsection{Introduction}
+
+The purpose of this experiment is to investigate the impact of Dropout and Batch Norm on overfitting. As explained, overfitting is a common problem in deep learning models, where the model performs well on the training dataset but poorly on the validation and test sets. Dropout and Batch Norm are two popular regularization techniques used to prevent overfitting. Dropout randomly drops out some neurons during training, while Batch Norm normalizes the output of each layer to ensure that the distribution of the input to each layer is consistent. In this experiment, we aim to compare the performance of a neural network trained with and without these regularization techniques.
 
 
-\begin{figure}[H]
-\centering
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_False__BatchNorm_False.png}
-  \caption{Training v Validation Loss}
-  \label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_False__BatchNorm_False.png}
-  \caption{Training v Validation Accuracy}
-  \label{fig:sub2}
-\end{subfigure}
-\caption{Model performance without any regularization}
-\label{fig:test}
-\end{figure}
+\subsection{Method}
 
-\begin{figure}[H]
-\centering
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_True__BatchNorm_False.png}
-  \caption{Training v Validation Loss}
-  \label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_True__BatchNorm_False.png}
-  \caption{Training v Validation Accuracy}
-  \label{fig:sub2}
-\end{subfigure}
-\caption{Model performance with Dropout}
-\label{fig:test}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_False__BatchNorm_True.png}
-  \caption{Training v Validation Loss}
-  \label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_False__BatchNorm_True.png}
-  \caption{Training v Validation Accuracy}
-  \label{fig:sub2}
-\end{subfigure}
-\caption{Model performance with Batch Norm}
-\label{fig:test}
-\end{figure}
+We trained our neural network for 100 epochs in four different configurations: without any regularization, with Dropout, with Batch Norm, and with both Dropout and Batch Norm. We recorded the classification accuracy and loss on both the training and validation datasets, as well as the accuracy on the test set. The dropout rate was set to 0.5, and the batch size was set to 64. Loss and accuracy curves on training and validation sets recorded during training are available here: Figures \ref{fig:without-regularization}, \ref{fig:with-dropout}, \ref{fig:with-batchnorm}, and \ref{fig:with-dropout-and-batchnorm}.
 
 
-\begin{figure}[H]
-\centering
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_True__BatchNorm_True.png}
-  \caption{Training v Validation Loss}
-  \label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{0.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_True__BatchNorm_True.png}
-  \caption{Training v Validation Accuracy}
-  \label{fig:sub2}
-\end{subfigure}
-\caption{Model performance with both Dropout and Batch Norm}
-\label{fig:test}
-\end{figure}
+\subsection{Results}
 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{img/baptiste/baptiste_val_accuracies_comparison.png}
     \caption{Comparison between the four accuracies on validation set}
+    \label{val-accuracies}
 \end{figure}
+
+Figure \ref{val-accuracies} shows that all accuracies on the validation set are similar, regardless of the regularization technique used. However, Figure \ref{test-accuracies} reveals that the accuracies on the test set are different from each other. The model with Dropout achieves slightly better overall accuracy on the test set than the original model, indicating that Dropout helps to improve the model's generalization ability.
+
 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{img/baptiste/baptiste_test_accuracies_comparison.png}
     \caption{Comparison between the four accuracies on test set}
+    \label{test-accuracies}
 \end{figure}
 
 
-All accuracies on the validation are similar, whatever the combination of regularization technique is.
 
-However, accuracies on the test set are different from each other.
+On the other hand, models incorporating Batch Norm achieve an accuracy level that is notably low, even failing to surpass random chance. This trend shows that Batch Normalization hinders the generalization ability of the model in our case. We came up with several hypotheses to explain this unexpected behavior. During inference, Batch Norm resorts to parameters that were learnt during training based on the statistics of the training data. Therefore, if the discrepancy is substantial between the data distribution of the training set and the test set, then the Batch Normalization layer may not work as well during inference, leading to poor performance. In conclusion, the out-of-domain data contained in the test set explains why Batch Norm worsens model robustness, according to the test accuracy metric.
 
-On the one hand, models incorporating Batch Norm achieve an accuracy level that is notably low, even failing to surpass random chance. This trend shows that Batch Normalization hinders generalization ability of the model in our case. We came up with several hypothesis to explain this unexpected behavior. During inference, Batch Norm resorts to parameters that were learnt during training based on the statistics of the training data. Therefore, if the discrepancy is substantial between the data distribution of the training set and the test set, then the Batch Normalization layer may not work as well during inference, leading to poor performance. In conclusion, the out-of-domain data contained in the test set explains why Batch Norm worsens model robustness, according to the test accuracy metric.
+\subsection{Discussion}
 
-On the other hand, the model with Dropout achieves slightly better overall accuracy on the test set than the original model.
+The results of this experiment suggest that Dropout is an effective regularization technique that can help to improve the generalization ability of neural networks. On the other hand, Batch Norm may not always be beneficial, especially when the data distribution of the test set differs substantially from that of the training set.
+
+Note well that the results of this experiment may not generalize to other datasets or models. Further experimentation is necessary to confirm these findings and to explore the effectiveness of other regularization techniques.
+
+
+\subsection{Conclusion}
+
+In this experiment, we compared the performance of a neural network trained with and without Dropout and Batch Norm. The results show that Dropout helps to improve the generalization ability of the model, while Batch Norm may not always be beneficial. The findings of this experiment can help to inform the choice of regularization techniques in deep learning models. Further research is needed to confirm these results and to explore the effectiveness of other regularization techniques.
+
 
 \section{Model Evaluation}
 \subsection{Basic Model Evaluation} \label{sec:basicEval}
@@ -541,6 +482,10 @@ Although we only used two different types of distortion in this study, our resul
 
 \section{Final Conclusion}
 
+In conclusion, this research project applied the CRISP-ML methodology to the problem of classifying rock, paper, or scissors from images that contain exactly one hand. The project explored the three main steps in the process: Data Engineering, Model Engineering, and Model Evaluation. 
+The findings suggest that preprocessing techniques can enhance the quality of input images, although sophisticated techniques might be required to improve performance beyond a certain point. Furthermore, the limitation of the preprocessing techniques and the need for more representative training data suggest that another approach should be considered to improve the overall performance of the hand gesture recognition model. 
+The results of the Model Engineering experiment suggest that Dropout is an effective regularization technique that can help improve the generalization ability of neural networks, while Batch Norm may not always be beneficial. 
+The Model Evaluation experiment showed that training with more diverse data, including noisy data, can help improve the model's robustness. However, further investigation is necessary to determine the optimal approach for incorporating noisy data in the training process to achieve both robustness and high performance. Overall, this project highlights the importance of applying the CRISP-ML methodology to ensure quality assurance in developing machine learning applications.
 
 \newpage
 \section*{References}
@@ -629,6 +574,82 @@ Total                      & 92.8\% & 98.0\% & 95.6\%   & 95.5\% \\ \bottomrule
     \label{fig:exp-de-acc-val}
 \end{figure}
 
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_False__BatchNorm_False.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_False__BatchNorm_False.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance without any regularization}
+\label{fig:without-regularization}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_True__BatchNorm_False.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_True__BatchNorm_False.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance with Dropout}
+\label{fig:with-dropout}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_False__BatchNorm_True.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_False__BatchNorm_True.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance with Batch Norm}
+\label{fig:with-batchnorm}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_val_loss__Dropouts_True__BatchNorm_True.png}
+  \caption{Training v Validation Loss}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{0.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{img/baptiste/baptiste_100epoches_train_accuracy__Dropouts_True__BatchNorm_True.png}
+  \caption{Training v Validation Accuracy}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Model performance with both Dropout and Batch Norm}
+\label{fig:with-dropout-and-batchnorm}
+\end{figure}
+
+
+
 \begin{table}[H]
 	\centering
 	\caption{Performance metrics for our standard model on the randomly distorted testset}
@@ -710,5 +731,10 @@ Final Conclusion						& $\surd$ & & \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+
+
+Here is the link to our GitHub repository : \href{https://github.com/bptstbn/shifumi/tree/ja_final_report}{shifumi}.
+
 
 \end{document}
