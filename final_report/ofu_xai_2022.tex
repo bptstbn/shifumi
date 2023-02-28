@@ -388,7 +388,7 @@ To further evaluate, we can look at the confusion matrix of our model's performa
 The confusion matrix (Table \ref{tab:CM_model_test}) shows that the model correctly classified 41 instances of the Rock class, 52 instances of the Paper class, and 38 instances of the Scissors class. The most common error made by the model is to mistake scissors for paper, which occurs in 6.3\% of the cases. This error is understandable because the paper and scissors signs are closely related, and a similar hand gesture can be used to represent both signs. However, this error occurred only in 10 instances, which is a relatively small number of misclassifications. One should note that this result should be interpreted with caution due to the limited size (150 images) of the test set. For a more thorough evaluation a larger and more diverse test set is needed to fully evaluate the model's performance and identify more potential imbalances. \newline
 Despite these limitations, the evaluation suggests that the model is reasonably effective at predicting the correct hand sign. In the next section, we describe an experiment that tests the performance of the model on a noisy test set to further evaluate our model and assess its robustness.
 
-\subsection{Experiment - Evaluating Robustness On Distorted Images}
+\subsection{Experiment - evaluating robustness on distorted images}
 \subsubsection{Introduction}
 Robustness is a critical aspect of any machine learning model, particularly for image classification tasks. It can be defined as the ability of a model to maintain its performance under naturally-induced image corruptions or alterations \citep{robustness}.
 
@@ -488,7 +488,7 @@ The results of the Model Engineering experiment suggest that Dropout is an effec
 The Model Evaluation experiment showed that training with more diverse data, including noisy data, can help improve the model's robustness. However, further investigation is necessary to determine the optimal approach for incorporating noisy data in the training process to achieve both robustness and high performance. Overall, this project highlights the importance of applying the CRISP-ML methodology to ensure quality assurance in developing machine learning applications.
 
 \newpage
-\section*{References}
+%\section*{References}
 
 
 \bibliography{bibliography}
